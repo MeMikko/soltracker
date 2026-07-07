@@ -208,13 +208,7 @@ export function ResultsContent() {
             {(wallet || token) && (
               <div className="crypto-card p-4 sm:p-6">
                 {wallet && <WalletDetails data={wallet} />}
-                {token && (
-                  <TokenDetails
-                    data={token}
-                    isFreeTier={usage?.tier !== "pro"}
-                    onUpgrade={() => setUpgradeOpen(true)}
-                  />
-                )}
+                {token && <TokenDetails data={token} />}
               </div>
             )}
           </div>

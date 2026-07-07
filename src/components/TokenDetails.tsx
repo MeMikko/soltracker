@@ -1,15 +1,13 @@
 import type { TokenDetails as TokenDetailsType } from "@/lib/types";
 import { formatNumber, formatSupply, truncateAddress } from "@/lib/format";
 import { DetailCard } from "./DetailCard";
-import { LockedField } from "./LockedField";
+import { TokenComingSoonSections } from "./teasers/ComingSoonTeaser";
 
 interface TokenDetailsProps {
   data: TokenDetailsType;
-  isFreeTier: boolean;
-  onUpgrade: () => void;
 }
 
-export function TokenDetails({ data, isFreeTier, onUpgrade }: TokenDetailsProps) {
+export function TokenDetails({ data }: TokenDetailsProps) {
   return (
     <div className="space-y-8">
       <section>
@@ -57,21 +55,7 @@ export function TokenDetails({ data, isFreeTier, onUpgrade }: TokenDetailsProps)
         </div>
       </section>
 
-      <section>
-        <h3 className="section-label mb-4">Holder Distribution</h3>
-        {isFreeTier ? (
-          <div className="grid grid-cols-1 gap-3 xs:grid-cols-2 lg:grid-cols-4">
-            <LockedField label="Top 10% Hold" onUpgrade={onUpgrade} />
-            <LockedField label="Top 50% Hold" onUpgrade={onUpgrade} />
-            <LockedField label="Gini Coefficient" onUpgrade={onUpgrade} />
-            <LockedField label="Whale Count" onUpgrade={onUpgrade} />
-          </div>
-        ) : (
-          <p className="text-sm text-gray-500">
-            Pro holder distribution analytics coming soon.
-          </p>
-        )}
-      </section>
+      <TokenComingSoonSections />
     </div>
   );
 }
