@@ -93,8 +93,8 @@ export default function HomePage() {
               <span className="gradient-text">wallets & tokens</span>
             </h1>
             <p className="mt-4 max-w-lg text-center text-sm leading-relaxed text-gray-500 sm:text-base">
-              Paste any Solana address to get an instant risk score, authority
-              checks, liquidity data, and holder metrics.
+              Paste a wallet or token mint address for an instant risk score,
+              authority checks, liquidity data, and holder metrics.
             </p>
 
             <div className="mt-6 w-full max-w-2xl">

@@ -12,8 +12,22 @@ import type {
 const TOKEN_PROGRAM = "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA";
 const TOKEN_2022_PROGRAM = "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb";
 const SYSTEM_PROGRAM = "11111111111111111111111111111111";
+const PUMP_AMM_PROGRAM = "pAMMBay6oceH9fJKBRHGP5D4bD4sWpmSwMn52FMfXEA";
+const PUMP_BONDING_PROGRAM = "6EF8rrecthR5Dkzon8Nwu78hRvfCKubJ14M5uBEwF6P";
 const TOKEN_PROGRAMS = new Set([TOKEN_PROGRAM, TOKEN_2022_PROGRAM]);
 const FUNGIBLE_INTERFACES = new Set(["FungibleToken", "FungibleAsset"]);
+
+function unsupportedAddressMessage(owner: string): string {
+  if (owner === PUMP_AMM_PROGRAM) {
+    return "This is a Pump liquidity pool address, not a token mint. On pump.fun or DexScreener, copy the token mint (often ends in ...pump), not the pool.";
+  }
+
+  if (owner === PUMP_BONDING_PROGRAM) {
+    return "This is a Pump bonding curve address, not a token mint. Paste the token mint address instead.";
+  }
+
+  return "This address is not a wallet or token mint. Paste a Solana wallet or token mint address.";
+}
 
 interface AccountInfoResult {
   value: {
@@ -85,7 +99,7 @@ export async function detectEntityType(address: string): Promise<EntityType> {
   }
 
   throw new HeliusError(
-    "Address is not a wallet or token mint. Paste a wallet or token mint address.",
+    unsupportedAddressMessage(account.value.owner),
     "NOT_FOUND"
   );
 }

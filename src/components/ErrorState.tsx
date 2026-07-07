@@ -8,7 +8,7 @@ interface ErrorStateProps {
 
 const MESSAGES: Record<string, string> = {
   INVALID_ADDRESS: "The address format is invalid. Enter a valid Solana base58 address.",
-  NOT_FOUND: "No on-chain account found for this address.",
+  NOT_FOUND: "This address is not a wallet or token mint.",
   RATE_LIMIT:
     "You've used all 5 free searches for today on this wallet. Upgrade to Pro for unlimited access.",
   WALLET_REQUIRED:
@@ -21,7 +21,7 @@ const MESSAGES: Record<string, string> = {
 
 export function ErrorState({ error, onRetry, onUpgrade }: ErrorStateProps) {
   const code = "code" in error ? error.code : "INTERNAL";
-  const message = MESSAGES[code] ?? error.error;
+  const message = error.error || MESSAGES[code] || "Something went wrong.";
 
   return (
     <div

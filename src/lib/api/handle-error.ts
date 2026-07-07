@@ -33,7 +33,7 @@ export function handleApiError(error: unknown) {
   if (error instanceof HeliusError) {
     switch (error.code) {
       case "NOT_FOUND":
-        return apiError("Address not found on-chain", "NOT_FOUND", 404);
+        return apiError(error.message, "NOT_FOUND", 404);
       case "TIMEOUT":
         return apiError(
           "Request timed out while fetching on-chain data. Please try again.",
