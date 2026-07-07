@@ -4,6 +4,7 @@ import {
   memoryCacheSet,
 } from "@/lib/dev/memory-store";
 import { prisma } from "@/lib/db";
+import { withDbFallback } from "@/lib/db-safe";
 import type { CacheEnvelope, PostgresCacheAdapter } from "./types";
 
 function createMemoryPostgresAdapter(): PostgresCacheAdapter {
@@ -20,35 +21,47 @@ function createMemoryPostgresAdapter(): PostgresCacheAdapter {
 function createPrismaPostgresAdapter(): PostgresCacheAdapter {
   return {
     async get<T>(key: string): Promise<CacheEnvelope<T> | null> {
-      const entry = await prisma.cacheEntry.findUnique({ where: { key } });
-      if (!entry || entry.expiresAt <= new Date()) {
-        return null;
-      }
+      return withDbFallback(
+        async () => {
+          const entry = await prisma.cacheEntry.findUnique({ where: { key } });
+          if (!entry || entry.expiresAt <= new Date()) {
+            return null;
+          }
 
-      return {
-        data: entry.value as T,
-        cachedAt: entry.cachedAt.toISOString(),
-      };
+          return {
+            data: entry.value as T,
+            cachedAt: entry.cachedAt.toISOString(),
+          };
+        },
+        null,
+        `cache read (${key})`
+      );
     },
 
     async set<T>(key: string, value: T, ttlSeconds: number): Promise<void> {
-      const now = new Date();
-      const expiresAt = new Date(now.getTime() + ttlSeconds * 1000);
+      await withDbFallback(
+        async () => {
+          const now = new Date();
+          const expiresAt = new Date(now.getTime() + ttlSeconds * 1000);
 
-      await prisma.cacheEntry.upsert({
-        where: { key },
-        create: {
-          key,
-          value: value as object,
-          cachedAt: now,
-          expiresAt,
+          await prisma.cacheEntry.upsert({
+            where: { key },
+            create: {
+              key,
+              value: value as object,
+              cachedAt: now,
+              expiresAt,
+            },
+            update: {
+              value: value as object,
+              cachedAt: now,
+              expiresAt,
+            },
+          });
         },
-        update: {
-          value: value as object,
-          cachedAt: now,
-          expiresAt,
-        },
-      });
+        undefined,
+        `cache write (${key})`
+      );
     },
   };
 }

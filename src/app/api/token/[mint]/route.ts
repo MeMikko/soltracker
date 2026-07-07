@@ -4,6 +4,8 @@ import { fetchTokenWithPolicy } from "@/lib/api/fetch-policy";
 import { toTokenDetails } from "@/lib/api/mappers";
 import { parseSolanaAddress } from "@/lib/validation";
 
+export const maxDuration = 30;
+
 export async function GET(
   request: Request,
   { params }: { params: Promise<{ mint: string }> }

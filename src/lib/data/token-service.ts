@@ -1,6 +1,7 @@
 import { getCachedOrFetch } from "@/lib/cache";
 import { hasDatabase } from "@/lib/config";
 import { prisma } from "@/lib/db";
+import { withDbFallback } from "@/lib/db-safe";
 import {
   fetchTokenChainData,
   hasHeliusApiKey,
@@ -24,26 +25,31 @@ async function fetchLiveToken(mintAddress: string): Promise<TokenChainData> {
 async function persistToken(data: TokenChainData): Promise<void> {
   if (!hasDatabase()) return;
 
-  await prisma.token.upsert({
-    where: { mintAddress: data.mintAddress },
-    create: {
-      mintAddress: data.mintAddress,
-      creatorWallet: data.creatorWallet,
-      supply: data.supply,
-      mintAuthority: data.mintAuthority,
-      freezeAuthority: data.freezeAuthority,
-      holderCount: data.holderCount,
-      cachedAt: new Date(),
-    },
-    update: {
-      creatorWallet: data.creatorWallet,
-      supply: data.supply,
-      mintAuthority: data.mintAuthority,
-      freezeAuthority: data.freezeAuthority,
-      holderCount: data.holderCount,
-      cachedAt: new Date(),
-    },
-  });
+  await withDbFallback(
+    () =>
+      prisma.token.upsert({
+        where: { mintAddress: data.mintAddress },
+        create: {
+          mintAddress: data.mintAddress,
+          creatorWallet: data.creatorWallet,
+          supply: data.supply,
+          mintAuthority: data.mintAuthority,
+          freezeAuthority: data.freezeAuthority,
+          holderCount: data.holderCount,
+          cachedAt: new Date(),
+        },
+        update: {
+          creatorWallet: data.creatorWallet,
+          supply: data.supply,
+          mintAuthority: data.mintAuthority,
+          freezeAuthority: data.freezeAuthority,
+          holderCount: data.holderCount,
+          cachedAt: new Date(),
+        },
+      }),
+    undefined,
+    `token persist (${data.mintAddress})`
+  );
 }
 
 export async function getTokenData(

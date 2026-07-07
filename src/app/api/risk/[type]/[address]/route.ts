@@ -10,6 +10,8 @@ import { computeAndPersistRisk } from "@/lib/data/risk-service";
 import type { EntityType } from "@/lib/types";
 import { parseSolanaAddress } from "@/lib/validation";
 
+export const maxDuration = 30;
+
 export async function GET(
   request: Request,
   { params }: { params: Promise<{ type: string; address: string }> }

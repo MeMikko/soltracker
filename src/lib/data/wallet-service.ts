@@ -1,6 +1,7 @@
 import { getCachedOrFetch } from "@/lib/cache";
 import { hasDatabase } from "@/lib/config";
 import { prisma } from "@/lib/db";
+import { withDbFallback } from "@/lib/db-safe";
 import {
   fetchWalletChainData,
   hasHeliusApiKey,
@@ -22,24 +23,29 @@ async function fetchLiveWallet(address: string): Promise<WalletChainData> {
 async function persistWallet(data: WalletChainData): Promise<void> {
   if (!hasDatabase()) return;
 
-  await prisma.wallet.upsert({
-    where: { address: data.address },
-    create: {
-      address: data.address,
-      firstSeenAt: data.firstSeenAt,
-      lastSeenAt: data.lastSeenAt,
-      solBalance: data.solBalance,
-      txCount: data.txCount,
-      cachedAt: new Date(),
-    },
-    update: {
-      firstSeenAt: data.firstSeenAt,
-      lastSeenAt: data.lastSeenAt,
-      solBalance: data.solBalance,
-      txCount: data.txCount,
-      cachedAt: new Date(),
-    },
-  });
+  await withDbFallback(
+    () =>
+      prisma.wallet.upsert({
+        where: { address: data.address },
+        create: {
+          address: data.address,
+          firstSeenAt: data.firstSeenAt,
+          lastSeenAt: data.lastSeenAt,
+          solBalance: data.solBalance,
+          txCount: data.txCount,
+          cachedAt: new Date(),
+        },
+        update: {
+          firstSeenAt: data.firstSeenAt,
+          lastSeenAt: data.lastSeenAt,
+          solBalance: data.solBalance,
+          txCount: data.txCount,
+          cachedAt: new Date(),
+        },
+      }),
+    undefined,
+    `wallet persist (${data.address})`
+  );
 }
 
 export async function getWalletData(

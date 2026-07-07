@@ -11,7 +11,9 @@ import type {
 
 const TOKEN_PROGRAM = "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA";
 const TOKEN_2022_PROGRAM = "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb";
+const SYSTEM_PROGRAM = "11111111111111111111111111111111";
 const TOKEN_PROGRAMS = new Set([TOKEN_PROGRAM, TOKEN_2022_PROGRAM]);
+const FUNGIBLE_INTERFACES = new Set(["FungibleToken", "FungibleAsset"]);
 
 interface AccountInfoResult {
   value: {
@@ -42,6 +44,14 @@ interface LargestAccountsResult {
   }>;
 }
 
+function isFungibleAsset(asset: HeliusAsset): boolean {
+  if (asset.interface && FUNGIBLE_INTERFACES.has(asset.interface)) {
+    return true;
+  }
+
+  return Boolean(asset.token_info);
+}
+
 export async function detectEntityType(address: string): Promise<EntityType> {
   const account = await heliusRpc<AccountInfoResult>("getAccountInfo", [
     address,
@@ -61,7 +71,23 @@ export async function detectEntityType(address: string): Promise<EntityType> {
     return "wallet";
   }
 
-  return "wallet";
+  if (account.value.owner === SYSTEM_PROGRAM) {
+    return "wallet";
+  }
+
+  try {
+    const asset = await heliusRpc<HeliusAsset>("getAsset", { id: address });
+    if (isFungibleAsset(asset)) {
+      return "token";
+    }
+  } catch {
+    // Asset not indexed or fetch failed — treat as unsupported below.
+  }
+
+  throw new HeliusError(
+    "Address is not a wallet or token mint. Paste a wallet or token mint address.",
+    "NOT_FOUND"
+  );
 }
 
 async function countTokenHolders(

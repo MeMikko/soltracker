@@ -62,5 +62,6 @@ export function handleApiError(error: unknown) {
     }
   }
 
+  console.error("[api] unhandled error", error);
   return apiError("An unexpected error occurred", "INTERNAL", 500);
 }

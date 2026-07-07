@@ -40,10 +40,14 @@ export async function getCachedOrFetch<T>(
 
   const liveData = await fetchFn();
 
-  await Promise.all([
-    postgres.set(key, liveData, ttlSeconds),
-    redis ? redis.set(key, liveData, ttlSeconds) : Promise.resolve(),
-  ]);
+  try {
+    await Promise.all([
+      postgres.set(key, liveData, ttlSeconds),
+      redis ? redis.set(key, liveData, ttlSeconds) : Promise.resolve(),
+    ]);
+  } catch (error) {
+    console.error(`[cache] write failed for ${key}`, error);
+  }
 
   return { data: liveData, source: "live" };
 }

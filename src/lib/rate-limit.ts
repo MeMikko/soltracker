@@ -10,6 +10,7 @@ import {
   memoryIncrementSearchCount,
 } from "@/lib/dev/memory-store";
 import { prisma } from "@/lib/db";
+import { withDbFallback } from "@/lib/db-safe";
 import type { UsageResponse } from "@/lib/types";
 
 export const FREE_DAILY_LIMIT = 5;
@@ -75,10 +76,16 @@ async function getSearchCount(identifier: string, date: string): Promise<number>
   let used: number;
 
   if (hasDatabase()) {
-    const log = await prisma.searchLog.findUnique({
-      where: { identifier_date: { identifier, date } },
-    });
-    used = log?.count ?? 0;
+    used = await withDbFallback(
+      async () => {
+        const log = await prisma.searchLog.findUnique({
+          where: { identifier_date: { identifier, date } },
+        });
+        return log?.count ?? 0;
+      },
+      memoryGetSearchCount(identifier, date),
+      `search count (${identifier})`
+    );
   } else {
     used = memoryGetSearchCount(identifier, date);
   }
@@ -99,12 +106,18 @@ async function incrementSearchCount(
   let used: number;
 
   if (hasDatabase()) {
-    const log = await prisma.searchLog.upsert({
-      where: { identifier_date: { identifier, date } },
-      create: { identifier, date, count: 1 },
-      update: { count: { increment: 1 } },
-    });
-    used = log.count;
+    used = await withDbFallback(
+      async () => {
+        const log = await prisma.searchLog.upsert({
+          where: { identifier_date: { identifier, date } },
+          create: { identifier, date, count: 1 },
+          update: { count: { increment: 1 } },
+        });
+        return log.count;
+      },
+      memoryIncrementSearchCount(identifier, date),
+      `search increment (${identifier})`
+    );
   } else {
     used = memoryIncrementSearchCount(identifier, date);
   }

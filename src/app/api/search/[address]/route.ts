@@ -8,6 +8,8 @@ import { assertCanSearch, consumeSearch, getSearchUsage } from "@/lib/rate-limit
 import type { EntityType, SearchResponse } from "@/lib/types";
 import { parseSolanaAddress } from "@/lib/validation";
 
+export const maxDuration = 30;
+
 export async function GET(
   request: Request,
   { params }: { params: Promise<{ address: string }> }

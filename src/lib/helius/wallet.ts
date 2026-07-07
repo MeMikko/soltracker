@@ -24,7 +24,7 @@ export async function fetchWalletChainData(
         showGrandTotal: true,
       },
     }),
-    fetchAllSignatures(address),
+    fetchRecentSignatures(address),
   ]);
 
   const blockTimes = signatures
@@ -50,35 +50,14 @@ export async function fetchWalletChainData(
   };
 }
 
-async function fetchAllSignatures(address: string): Promise<SignatureInfo[]> {
-  const collected: SignatureInfo[] = [];
-  let before: string | undefined;
+// One page keeps serverless handlers within Vercel's timeout budget.
+const SIGNATURE_PAGE_LIMIT = 1_000;
 
-  // Paginate through history; cap at 5k signatures for MVP performance.
-  while (collected.length < 5_000) {
-    const config: { limit: number; before?: string } = { limit: 1000 };
-    if (before) {
-      config.before = before;
-    }
-
-    const page = await heliusRpc<SignatureInfo[]>("getSignaturesForAddress", [
-      address,
-      config,
-    ]);
-
-    if (page.length === 0) {
-      break;
-    }
-
-    collected.push(...page);
-    before = page[page.length - 1]?.signature;
-
-    if (page.length < 1000) {
-      break;
-    }
-  }
-
-  return collected;
+async function fetchRecentSignatures(address: string): Promise<SignatureInfo[]> {
+  return heliusRpc<SignatureInfo[]>("getSignaturesForAddress", [
+    address,
+    { limit: SIGNATURE_PAGE_LIMIT },
+  ]);
 }
 
 export async function assertWalletExists(address: string): Promise<void> {
