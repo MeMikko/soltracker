@@ -1,0 +1,93 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: dark;
+}
+
+body {
+  @apply bg-surface font-sans text-gray-100 antialiased;
+  background-image:
+    radial-gradient(ellipse 70% 45% at 50% -10%, rgba(153, 69, 255, 0.12), transparent),
+    radial-gradient(ellipse 50% 30% at 100% 0%, rgba(20, 241, 149, 0.06), transparent),
+    linear-gradient(rgba(255, 255, 255, 0.018) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.018) 1px, transparent 1px);
+  background-size: 100% 100%, 100% 100%, 40px 40px, 40px 40px;
+  background-attachment: fixed;
+}
+
+@layer components {
+  .crypto-card {
+    @apply rounded-xl border border-surface-border bg-surface-card shadow-card shadow-inner-glow;
+    background-image: linear-gradient(
+      135deg,
+      rgba(153, 69, 255, 0.04) 0%,
+      transparent 50%,
+      rgba(20, 241, 149, 0.03) 100%
+    );
+  }
+
+  .crypto-card-hover {
+    @apply crypto-card transition-all duration-200 hover:border-solana-purple/30 hover:shadow-glow-sm;
+  }
+
+  .gradient-text {
+    @apply bg-gradient-solana bg-clip-text text-transparent;
+  }
+
+  .section-label {
+    @apply text-xs font-semibold uppercase tracking-[0.2em] text-gray-500;
+  }
+
+  .btn-primary {
+    @apply rounded-lg bg-gradient-solana px-5 py-2.5 text-sm font-semibold text-surface shadow-glow-sm transition-all hover:opacity-90 hover:shadow-glow active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:shadow-none;
+  }
+
+  .btn-ghost {
+    @apply rounded-lg border border-surface-border bg-surface-raised/80 px-4 py-2 text-sm text-gray-300 transition-colors hover:border-surface-hover hover:bg-surface-hover;
+  }
+
+  .input-crypto {
+    @apply w-full rounded-lg border border-surface-border bg-surface-raised/90 px-4 py-3 font-mono text-sm text-white shadow-inner-glow placeholder:text-gray-600 transition-colors focus:border-solana-purple/50 focus:outline-none focus:ring-1 focus:ring-solana-purple/30 disabled:opacity-50;
+  }
+}
+
+@layer utilities {
+  .text-risk-low {
+    @apply text-accent-green;
+  }
+  .text-risk-medium {
+    @apply text-accent-yellow;
+  }
+  .text-risk-high {
+    @apply text-accent-red;
+  }
+  .bg-risk-low {
+    @apply border-accent-green/25 bg-accent-green/10;
+  }
+  .bg-risk-medium {
+    @apply border-accent-yellow/25 bg-accent-yellow/10;
+  }
+  .bg-risk-high {
+    @apply border-accent-red/25 bg-accent-red/10;
+  }
+}
+
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #1e1e2e;
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #2a2a3e;
+}

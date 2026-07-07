@@ -1,0 +1,78 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+/// Cached wallet intelligence. `deployedTokens` reserved for future developer detection.
+model Wallet {
+  address     String    @id
+  firstSeenAt DateTime?
+  lastSeenAt  DateTime?
+  solBalance  Decimal   @db.Decimal(20, 9)
+  txCount     Int       @default(0)
+  cachedAt    DateTime
+
+  // deployedTokens Token[] @relation("WalletDeployedTokens")
+}
+
+/// Cached token intelligence.
+model Token {
+  mintAddress     String   @id
+  creatorWallet   String?
+  supply          Decimal  @db.Decimal(38, 0)
+  mintAuthority   String?
+  freezeAuthority String?
+  holderCount     Int      @default(0)
+  cachedAt        DateTime
+
+  // creator Wallet? @relation("WalletDeployedTokens", fields: [creatorWallet], references: [address])
+}
+
+model RiskScore {
+  id            String   @id @default(cuid())
+  targetType    String
+  targetAddress String
+  score         Int
+  breakdown     Json
+  calculatedAt  DateTime @default(now())
+
+  @@unique([targetType, targetAddress])
+  @@index([targetAddress])
+}
+
+/// Freemium rate limiting — keyed by connected wallet per calendar day.
+model SearchLog {
+  id         String @id @default(cuid())
+  identifier String
+  date       String
+  count      Int    @default(0)
+
+  @@unique([identifier, date])
+  @@index([identifier, date])
+}
+
+/// Tracks distinct wallets authenticated per IP per day (anti multi-wallet abuse).
+model IpWalletLink {
+  id        String   @id @default(cuid())
+  ip        String
+  wallet    String
+  date      String
+  createdAt DateTime @default(now())
+
+  @@unique([ip, wallet, date])
+  @@index([ip, date])
+}
+
+/// Database persistence layer for the two-tier cache (Redis → DB → Helius).
+model CacheEntry {
+  key       String   @id
+  value     Json
+  cachedAt  DateTime
+  expiresAt DateTime
+
+  @@index([expiresAt])
+}
