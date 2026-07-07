@@ -36,6 +36,9 @@ function mapWallet(data: WalletChainData): WalletDetails {
 function mapToken(data: TokenChainData): TokenDetails {
   return {
     mint: data.mintAddress,
+    name: data.name,
+    symbol: data.symbol,
+    imageUrl: data.imageUrl,
     supply: Number(data.supply),
     decimals: data.decimals,
     creator: data.creatorWallet,
