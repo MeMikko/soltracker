@@ -8,6 +8,7 @@ import { hasDatabase } from "@/lib/config";
 import {
   memoryGetSearchCount,
   memoryIncrementSearchCount,
+  memoryTryClaimBilledSearch,
 } from "@/lib/dev/memory-store";
 import { prisma } from "@/lib/db";
 import { withDbFallback } from "@/lib/db-safe";
@@ -15,6 +16,7 @@ import type { UsageResponse } from "@/lib/types";
 
 export const FREE_DAILY_LIMIT = 5;
 const SECONDS_PER_DAY = 86_400;
+const BILLED_SEARCH_TTL_SECONDS = 12 * 60;
 
 function todayKey(): string {
   return new Date().toISOString().slice(0, 10);
@@ -22,6 +24,14 @@ function todayKey(): string {
 
 function redisUsageKey(identifier: string, date: string): string {
   return `ratelimit:search:${identifier}:${date}`;
+}
+
+function billedSearchKey(
+  identifier: string,
+  address: string,
+  date: string
+): string {
+  return `ratelimit:billed:${identifier}:${address}:${date}`;
 }
 
 function getLegacyIdentifier(request: Request): string {
@@ -143,6 +153,44 @@ export async function getSearchUsage(
   const identifier = getRequestIdentifier(request);
   const used = await getSearchCount(identifier, todayKey());
   return buildUsage(used, wallet);
+}
+
+async function tryClaimBilledSearch(
+  identifier: string,
+  address: string,
+  date: string
+): Promise<boolean> {
+  const key = billedSearchKey(identifier, address, date);
+  const redis = getRedis();
+
+  if (redis) {
+    const claimed = await redis.set(key, "1", {
+      nx: true,
+      ex: BILLED_SEARCH_TTL_SECONDS,
+    });
+    return claimed === "OK";
+  }
+
+  return memoryTryClaimBilledSearch(key, BILLED_SEARCH_TTL_SECONDS);
+}
+
+/**
+ * Bills at most once per wallet + target address while the cache window is warm.
+ * Prevents parallel /search + /risk calls from spending multiple daily searches.
+ */
+export async function consumeSearchForAddress(
+  request: Request,
+  address: string
+): Promise<UsageResponse> {
+  const identifier = getRequestIdentifier(request);
+  const date = todayKey();
+  const shouldBill = await tryClaimBilledSearch(identifier, address, date);
+
+  if (!shouldBill) {
+    return getSearchUsage(request);
+  }
+
+  return consumeSearch(request);
 }
 
 export async function consumeSearch(

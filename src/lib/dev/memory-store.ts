@@ -6,6 +6,7 @@ interface MemoryCacheEntry {
 }
 
 const searchCounts = new Map<string, number>();
+const billedSearches = new Map<string, number>();
 const ipWalletLinks = new Map<string, Set<string>>();
 const cacheEntries = new Map<string, MemoryCacheEntry>();
 
@@ -32,6 +33,21 @@ export function memoryIncrementSearchCount(
   const next = (searchCounts.get(key) ?? 0) + 1;
   searchCounts.set(key, next);
   return next;
+}
+
+export function memoryTryClaimBilledSearch(
+  key: string,
+  ttlSeconds: number
+): boolean {
+  const now = Date.now();
+  const expiresAt = billedSearches.get(key);
+
+  if (expiresAt && expiresAt > now) {
+    return false;
+  }
+
+  billedSearches.set(key, now + ttlSeconds * 1000);
+  return true;
 }
 
 export function memoryHasIpWalletLink(

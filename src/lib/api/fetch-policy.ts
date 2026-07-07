@@ -1,9 +1,13 @@
 import { peekCacheResult } from "@/lib/cache/peek-cache";
-import { getWalletData, getTokenData, TOKEN_CACHE_KEY_PREFIX } from "@/lib/data";
+import {
+  getWalletData,
+  getTokenData,
+  TOKEN_CACHE_KEY_PREFIX,
+} from "@/lib/data";
 import type { TokenChainData, WalletChainData } from "@/lib/helius/index";
 import {
   assertCanSearch,
-  consumeSearch,
+  consumeSearchForAddress,
   getSearchUsage,
 } from "@/lib/rate-limit";
 import type { UsageResponse } from "@/lib/types";
@@ -13,6 +17,14 @@ interface FetchResult<T> {
   data: T;
   source: CacheSource;
   usage: UsageResponse;
+}
+
+function targetAddressFromCacheKey(cacheKey: string): string {
+  if (cacheKey.startsWith(TOKEN_CACHE_KEY_PREFIX)) {
+    return cacheKey.slice(TOKEN_CACHE_KEY_PREFIX.length);
+  }
+
+  return cacheKey.replace(/^wallet:/, "");
 }
 
 async function resolveWithRateLimit<T>(
@@ -34,7 +46,10 @@ async function resolveWithRateLimit<T>(
 
   const usage =
     result.source === "live"
-      ? await consumeSearch(request)
+      ? await consumeSearchForAddress(
+          request,
+          targetAddressFromCacheKey(cacheKey)
+        )
       : await getSearchUsage(request);
 
   return { data: result.data, source: result.source, usage };

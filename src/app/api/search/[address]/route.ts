@@ -1,10 +1,18 @@
 import { NextResponse } from "next/server";
 import { handleApiError } from "@/lib/api/handle-error";
 import { peekCacheResult } from "@/lib/cache/peek-cache";
-import { TOKEN_CACHE_KEY_PREFIX } from "@/lib/data";
+import {
+  getTokenData,
+  getWalletData,
+  TOKEN_CACHE_KEY_PREFIX,
+} from "@/lib/data";
 import { detectEntityType, hasHeliusApiKey } from "@/lib/helius/index";
 import { mockEntityType } from "@/lib/mock-data";
-import { assertCanSearch, consumeSearch, getSearchUsage } from "@/lib/rate-limit";
+import {
+  assertCanSearch,
+  consumeSearchForAddress,
+  getSearchUsage,
+} from "@/lib/rate-limit";
 import type { EntityType, SearchResponse } from "@/lib/types";
 import { parseSolanaAddress } from "@/lib/validation";
 
@@ -33,7 +41,16 @@ export async function GET(
       type = hasHeliusApiKey()
         ? await detectEntityType(address)
         : mockEntityType(address);
-      usage = await consumeSearch(request);
+
+      const dataResult =
+        type === "wallet"
+          ? await getWalletData(address)
+          : await getTokenData(address);
+
+      usage =
+        dataResult.source === "live"
+          ? await consumeSearchForAddress(request, address)
+          : await getSearchUsage(request);
     }
 
     const body: SearchResponse & { usage: typeof usage } = {

@@ -1,7 +1,7 @@
 "use client";
 
 import { useParams, useRouter, useSearchParams } from "next/navigation";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { AppShell } from "@/components/AppShell";
 import { ErrorState } from "@/components/ErrorState";
 import { LoadingState } from "@/components/LoadingState";
@@ -54,8 +54,10 @@ export function ResultsContent() {
   const [risk, setRisk] = useState<RiskResponse | null>(null);
   const [wallet, setWallet] = useState<WalletDetailsType | null>(null);
   const [token, setToken] = useState<TokenDetailsType | null>(null);
+  const requestIdRef = useRef(0);
 
   const loadResults = useCallback(async () => {
+    const requestId = ++requestIdRef.current;
     setLoading(true);
     setError(null);
 
@@ -63,6 +65,8 @@ export function ResultsContent() {
 
     if (!type) {
       const search = await searchAddress(address);
+      if (requestId !== requestIdRef.current) return;
+
       if (!search.ok) {
         setError(search.error);
         setLoading(false);
@@ -74,6 +78,8 @@ export function ResultsContent() {
     }
 
     const riskResult = await fetchRisk(type, address);
+    if (requestId !== requestIdRef.current) return;
+
     if (!riskResult.ok) {
       setError(riskResult.error);
       setLoading(false);
@@ -88,6 +94,8 @@ export function ResultsContent() {
       type === "wallet"
         ? await fetchWallet(address)
         : await fetchToken(address);
+
+    if (requestId !== requestIdRef.current) return;
 
     if (!detailsResult.ok) {
       setError(detailsResult.error);
@@ -111,13 +119,6 @@ export function ResultsContent() {
 
   useEffect(() => {
     loadResults();
-  }, [loadResults]);
-
-  useEffect(() => {
-    const onWalletChange = () => loadResults();
-    window.addEventListener("wallet-session-changed", onWalletChange);
-    return () =>
-      window.removeEventListener("wallet-session-changed", onWalletChange);
   }, [loadResults]);
 
   const isAuthenticated = usage?.authenticated ?? false;
