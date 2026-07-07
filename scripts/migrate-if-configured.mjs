@@ -2,6 +2,8 @@ import { execSync } from "node:child_process";
 import { existsSync, readFileSync } from "node:fs";
 import { resolve } from "node:path";
 
+const INITIAL_MIGRATION = "20260707200000_init_mysql";
+
 function loadEnvFile(filename) {
   const path = resolve(process.cwd(), filename);
   if (!existsSync(path)) return;
@@ -37,6 +39,23 @@ function hasDatabaseConfig() {
   );
 }
 
+function run(command) {
+  execSync(command, { stdio: "inherit" });
+}
+
+function runCapture(command) {
+  try {
+    const output = execSync(command, {
+      stdio: ["ignore", "pipe", "pipe"],
+      encoding: "utf8",
+    });
+    return { ok: true, output };
+  } catch (error) {
+    const output = `${error.stdout ?? ""}${error.stderr ?? ""}`;
+    return { ok: false, output, status: error.status ?? 1 };
+  }
+}
+
 loadEnvFile(".env");
 loadEnvFile(".env.local");
 
@@ -46,4 +65,20 @@ if (!hasDatabaseConfig()) {
 }
 
 console.log("[migrate] applying prisma migrations");
-execSync("npx prisma migrate deploy", { stdio: "inherit" });
+const deploy = runCapture("npx prisma migrate deploy");
+
+if (deploy.ok) {
+  process.exit(0);
+}
+
+if (deploy.output.includes("P3005")) {
+  console.log(
+    "[migrate] database already has tables — baselining migration history"
+  );
+  run(`npx prisma migrate resolve --applied ${INITIAL_MIGRATION}`);
+  run("npx prisma migrate deploy");
+  process.exit(0);
+}
+
+console.error(deploy.output);
+process.exit(deploy.status ?? 1);
