@@ -75,13 +75,15 @@ export function UsageCounter({ usage, onUpgradeClick }: UsageCounterProps) {
           </span>
         )}
       </div>
-      {atLimit && onUpgradeClick && (
+      {onUpgradeClick && (
         <button
           type="button"
           onClick={onUpgradeClick}
-          className="btn-primary shrink-0 px-3 py-1.5 text-xs"
+          className={`shrink-0 px-3 py-1.5 text-xs ${
+            atLimit ? "btn-primary" : "btn-ghost border-zen-sage/25 text-zen-sage"
+          }`}
         >
-          Upgrade
+          {atLimit ? "Upgrade" : "Go Pro"}
         </button>
       )}
     </div>
