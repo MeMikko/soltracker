@@ -1,17 +1,12 @@
 import { ZodError } from "zod";
 import { apiError } from "@/lib/api-errors";
 import { WalletAuthRequiredError } from "@/lib/auth/errors";
-import { IpWalletLimitError } from "@/lib/auth/ip-wallet-limit";
 import { HeliusError } from "@/lib/helius/errors";
 import { RateLimitExceededError } from "@/lib/rate-limit";
 
 export function handleApiError(error: unknown) {
   if (error instanceof WalletAuthRequiredError) {
     return apiError(error.message, "WALLET_REQUIRED", 401);
-  }
-
-  if (error instanceof IpWalletLimitError) {
-    return apiError(error.message, "IP_WALLET_LIMIT", 403);
   }
 
   if (error instanceof ZodError) {

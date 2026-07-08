@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { handleApiError } from "@/lib/api/handle-error";
-import { assertWalletAllowedForIp, getClientIp } from "@/lib/auth/ip-wallet-limit";
+import { getClientIp, registerWalletForIp } from "@/lib/auth/ip-wallet-limit";
 import {
   createSessionToken,
   isWalletAuthDisabled,
@@ -42,7 +42,7 @@ export async function POST(request: Request) {
       );
     }
 
-    await assertWalletAllowedForIp(getClientIp(request), wallet);
+    await registerWalletForIp(getClientIp(request), wallet);
 
     const token = createSessionToken(wallet);
     const response = NextResponse.json({ ok: true, wallet });
