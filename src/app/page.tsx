@@ -107,20 +107,23 @@ export default function HomePage() {
             <div className="mt-5 w-full max-w-2xl">
               <SearchBar
                 onSearch={handleSearch}
-                disabled={!isAuthenticated || usage?.remaining === 0}
+                disabled={
+                  !isAuthenticated ||
+                  (usage?.tier === "free" && usage.remaining === 0)
+                }
                 autoFocus={isAuthenticated}
               />
             </div>
 
-            {usage?.remaining === 0 && (
+            {usage?.tier === "free" && usage.remaining === 0 && isAuthenticated && (
               <p className="mt-4 text-center text-sm text-accent-red">
-                Daily limit reached.{" "}
+                Daily free limit reached.{" "}
                 <button
                   type="button"
                   onClick={() => setUpgradeOpen(true)}
-                  className="font-medium text-solana-purple hover:underline"
+                  className="font-medium text-zen-sage hover:underline"
                 >
-                  Upgrade to continue
+                  Upgrade to Pro for unlimited searches
                 </button>
               </p>
             )}

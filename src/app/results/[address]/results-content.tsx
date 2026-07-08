@@ -131,7 +131,7 @@ export function ResultsContent() {
       return;
     }
 
-    if (usage?.remaining === 0) {
+    if (usage?.tier === "free" && usage.remaining === 0) {
       setUpgradeOpen(true);
       return;
     }
@@ -184,7 +184,10 @@ export function ResultsContent() {
           <SearchBar
             onSearch={handleSearch}
             loading={loading}
-            disabled={!isAuthenticated || usage?.remaining === 0}
+            disabled={
+              !isAuthenticated ||
+              (usage?.tier === "free" && usage.remaining === 0)
+            }
             compact
           />
         </div>

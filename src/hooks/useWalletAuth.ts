@@ -2,6 +2,10 @@
 
 import { useCallback, useEffect, useState } from "react";
 import {
+  clearWalletAdapterId,
+  rememberWalletAdapterId,
+} from "@/lib/wallet/payment-provider";
+import {
   discoverWallets,
   getActiveWallet,
   setActiveWallet,
@@ -68,6 +72,7 @@ async function authenticateWallet(adapter: WalletAdapter): Promise<void> {
   }
 
   setActiveWallet(adapter);
+  rememberWalletAdapterId(adapter.id);
 }
 
 export function useWalletAuth(): WalletAuthState {
@@ -174,6 +179,7 @@ export function useWalletAuth(): WalletAuthState {
     }
 
     setActiveWallet(null);
+    clearWalletAdapterId();
     setSession({ wallet: null, authenticated: false });
     window.dispatchEvent(new CustomEvent("wallet-session-changed"));
   }, []);
