@@ -1,7 +1,6 @@
 import type { TokenDetails as TokenDetailsType } from "@/lib/types";
 import { formatNumber, formatSupply, truncateAddress } from "@/lib/format";
 import { DetailCard } from "./DetailCard";
-import { TokenComingSoonSections } from "./teasers/ComingSoonTeaser";
 
 interface TokenDetailsProps {
   data: TokenDetailsType;
@@ -54,8 +53,6 @@ export function TokenDetails({ data }: TokenDetailsProps) {
           )}
         </div>
       </section>
-
-      <TokenComingSoonSections />
     </div>
   );
 }

@@ -1,3 +1,4 @@
+import { ZENERATING } from "@/lib/brand/zenerating";
 import { TeaserVisual, type TeaserIcon } from "./teasers/TeaserVisual";
 
 interface RoadmapItem {
@@ -39,9 +40,9 @@ const ROADMAP: RoadmapItem[] = [
   },
   {
     phase: 4,
-    title: "Wallet Clustering",
+    title: "Creator Funding Network",
     description:
-      "Trace fund flows and map wallet networks. See which addresses move together and fund new mints.",
+      "Trace who funded the creator, sibling wallets, coordinated buyers, and prior risky deploys.",
     status: "live",
     accent: "from-zen-sage/30 to-zen-deep",
     icon: "cluster",
@@ -127,13 +128,14 @@ export function ComingSoonSection() {
   return (
     <section className="mt-20 w-full max-w-5xl">
       <div className="mb-8 text-center">
-        <span className="section-label text-solana-purple/80">Roadmap</span>
+        <span className="section-label">{ZENERATING.name}</span>
         <h2 className="mt-2 text-xl font-bold tracking-tight text-white sm:text-2xl">
-          Product Roadmap
+          {ZENERATING.name} Roadmap
         </h2>
-        <p className="mx-auto mt-2 max-w-lg text-xs leading-relaxed text-gray-600 sm:text-sm">
-          {LIVE_PHASE_LABEL} are live today. Phases 5–10 are in active development —
-          holder analytics, alerts, extension, and AI intelligence on the way.
+        <p className="mx-auto mt-2 max-w-lg text-xs leading-relaxed text-gray-500 sm:text-sm">
+          {LIVE_PHASE_LABEL} are live today on {ZENERATING.name}. Phases 5–10 bring
+          holder analytics, alerts, extension, and AI intelligence — mindful due
+          diligence, not reckless aping.
         </p>
 
         <div className="mx-auto mt-5 max-w-sm">

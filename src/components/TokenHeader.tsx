@@ -29,7 +29,7 @@ export function TokenHeader({ data }: TokenHeaderProps) {
               onError={() => setImgError(true)}
             />
           ) : (
-            <div className="flex h-full w-full items-center justify-center bg-gradient-solana/20 text-lg font-bold text-solana-purple">
+            <div className="flex h-full w-full items-center justify-center bg-zen-sage/15 text-lg font-bold text-zen-sage">
               {(data.symbol ?? data.mint).slice(0, 2).toUpperCase()}
             </div>
           )}
@@ -41,7 +41,7 @@ export function TokenHeader({ data }: TokenHeaderProps) {
           </h1>
           <div className="mt-0.5 flex flex-wrap items-center gap-2">
             {data.symbol && (
-              <span className="rounded-md bg-solana-purple/10 px-2 py-0.5 text-xs font-semibold text-solana-purple">
+              <span className="rounded-md bg-zen-sage/15 px-2 py-0.5 text-xs font-semibold text-zen-sage">
                 ${data.symbol}
               </span>
             )}

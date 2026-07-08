@@ -84,12 +84,15 @@ export default function HomePage() {
           </div>
         ) : (
           <div className="flex flex-col items-center">
-            <div className="mb-3 flex items-center gap-2 rounded-full border border-surface-border bg-surface-raised/60 px-3 py-1 text-xs text-gray-500">
-              <span className="h-1.5 w-1.5 animate-pulse-glow rounded-full bg-solana-green" />
-              Live Solana mainnet data
+            <div className="mb-3 flex items-center gap-2 rounded-full border border-zen-border bg-zen-card/60 px-3 py-1 text-xs text-gray-500">
+              <span className="h-1.5 w-1.5 animate-pulse-glow rounded-full bg-zen-sage" />
+              {ZENERATING.name} · Live Solana mainnet
             </div>
 
-            <h1 className="max-w-2xl text-center text-3xl font-bold tracking-tight text-white sm:text-4xl lg:text-5xl">
+            <p className="text-[10px] font-semibold uppercase tracking-[0.3em] text-zen-sage">
+              {ZENERATING.name}
+            </p>
+            <h1 className="mt-2 max-w-2xl text-center text-3xl font-bold tracking-tight text-white sm:text-4xl lg:text-5xl">
               {ZENERATING.tagline}
             </h1>
             <p className="mt-4 max-w-lg text-center text-sm leading-relaxed text-gray-500 sm:text-base">
@@ -138,8 +141,9 @@ export default function HomePage() {
         )}
       </main>
 
-      <footer className="border-t border-surface-border/60 py-6 text-center text-xs text-gray-600">
-        Powered by Helius · Data cached 12 min · Not financial advice
+      <footer className="border-t border-zen-border/60 py-6 text-center text-xs text-gray-600">
+        {ZENERATING.name} · Powered by Helius · Data cached 12 min · Not financial
+        advice
       </footer>
 
       <UpgradeModal open={upgradeOpen} onClose={() => setUpgradeOpen(false)} />

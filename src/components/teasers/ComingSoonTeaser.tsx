@@ -1,3 +1,4 @@
+import { ZENERATING } from "@/lib/brand/zenerating";
 import { TeaserVisual, type TeaserIcon } from "./TeaserVisual";
 
 export interface ComingSoonTeaserItem {
@@ -34,8 +35,8 @@ export function ComingSoonTeaser({ item }: ComingSoonTeaserProps) {
           <TeaserVisual icon={item.icon} />
         </div>
 
-        <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 bg-surface/70 backdrop-blur-[3px]">
-          <span className="rounded-full border border-solana-purple/30 bg-solana-purple/15 px-4 py-1.5 text-[10px] font-semibold uppercase tracking-wider text-solana-purple">
+        <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 bg-zen-deep/70 backdrop-blur-[3px]">
+          <span className="rounded-full border border-zen-sage/30 bg-zen-sage/15 px-4 py-1.5 text-[10px] font-semibold uppercase tracking-wider text-zen-sage">
             Coming Soon
           </span>
           <span className="text-[10px] text-gray-500">Phase {item.phase}</span>
@@ -84,10 +85,15 @@ export function TokenComingSoonSections() {
   return (
     <section className="space-y-4">
       <div>
-        <h3 className="section-label">Upcoming Intelligence</h3>
-        <p className="mt-1 text-xs text-gray-600">
-          Preview what&apos;s shipping next — same modules from the roadmap,
-          tailored for token analysis.
+        <p className="text-[10px] font-semibold uppercase tracking-[0.25em] text-zen-sage">
+          {ZENERATING.name} Roadmap
+        </p>
+        <h3 className="mt-1 text-base font-semibold text-white">
+          Upcoming intelligence
+        </h3>
+        <p className="mt-1 text-xs text-gray-500">
+          What&apos;s shipping next on {ZENERATING.name} — calm, clear modules
+          tailored for this token.
         </p>
       </div>
 

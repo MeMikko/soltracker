@@ -12,7 +12,9 @@ import { TokenDetails } from "@/components/TokenDetails";
 import { TokenHeader } from "@/components/TokenHeader";
 import { UpgradeModal } from "@/components/UpgradeModal";
 import { WalletClusterSection } from "@/components/clustering/WalletClusterSection";
+import { TokenComingSoonSections } from "@/components/teasers/ComingSoonTeaser";
 import { WalletDetails } from "@/components/WalletDetails";
+import { ZENERATING } from "@/lib/brand/zenerating";
 import { WalletGate } from "@/components/WalletGate";
 import { useUsage } from "@/hooks/useUsage";
 import {
@@ -197,6 +199,18 @@ export function ResultsContent() {
           />
         ) : risk ? (
           <div className="space-y-6 lg:space-y-8">
+            <div className="flex flex-wrap items-end justify-between gap-3">
+              <div>
+                <p className="text-[10px] font-semibold uppercase tracking-[0.25em] text-zen-sage">
+                  {ZENERATING.name}
+                </p>
+                <p className="mt-1 text-xs text-gray-500">{ZENERATING.tagline}</p>
+              </div>
+              <p className="text-[10px] text-gray-600">
+                {entityType === "token" ? "Token intelligence" : "Wallet intelligence"}
+              </p>
+            </div>
+
             {token && <TokenHeader data={token} />}
 
             <div className="grid gap-6 lg:grid-cols-[minmax(240px,280px)_1fr] lg:gap-8">
@@ -220,14 +234,20 @@ export function ResultsContent() {
             )}
 
             {token && (
-              <div className="crypto-card p-4 sm:p-6">
-                <WalletClusterSection
-                  address={address}
-                  context="token_creator"
-                  creatorAddress={token.creator}
-                  tokenSymbol={token.symbol}
-                />
-              </div>
+              <>
+                <div className="crypto-card p-4 sm:p-6">
+                  <WalletClusterSection
+                    address={address}
+                    context="token_creator"
+                    creatorAddress={token.creator}
+                    tokenSymbol={token.symbol}
+                  />
+                </div>
+
+                <div className="crypto-card p-4 sm:p-6">
+                  <TokenComingSoonSections />
+                </div>
+              </>
             )}
           </div>
         ) : null}

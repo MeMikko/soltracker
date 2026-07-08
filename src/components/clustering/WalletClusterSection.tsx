@@ -87,7 +87,7 @@ export function WalletClusterSection({
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
           <p className="text-[10px] font-semibold uppercase tracking-[0.25em] text-zen-sage">
-            {ZENERATING.name} · Phase 4
+            {ZENERATING.name} · Funding intelligence
           </p>
           <h3 className="mt-1 text-base font-semibold text-white">{title}</h3>
           <p className="mt-1 max-w-xl text-xs leading-relaxed text-gray-500">

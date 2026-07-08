@@ -20,7 +20,7 @@ export function AppShell({
 }: AppShellProps) {
   return (
     <div className="flex min-h-screen flex-col">
-      <header className="sticky top-0 z-40 border-b border-surface-border/80 bg-surface/80 backdrop-blur-xl">
+      <header className="sticky top-0 z-40 border-b border-zen-border/80 bg-zen-deep/85 backdrop-blur-xl">
         <div className="mx-auto flex w-full max-w-6xl flex-col gap-3 px-4 py-3 sm:flex-row sm:items-center sm:justify-between sm:px-6 sm:py-4">
           <div className="flex min-w-0 items-center gap-3">
             <Link href="/" className="group flex shrink-0 items-center gap-2.5">
