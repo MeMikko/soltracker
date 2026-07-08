@@ -1,4 +1,5 @@
 import { getRedis } from "@/lib/cache/redis";
+import { isAdminWallet } from "@/lib/auth/admin-wallets";
 import { WalletAuthRequiredError } from "@/lib/auth/errors";
 import {
   getWalletFromRequest,
@@ -15,6 +16,8 @@ import { withDbFallback } from "@/lib/db-safe";
 import type { UsageResponse } from "@/lib/types";
 
 export const FREE_DAILY_LIMIT = 5;
+/** Display value for admin wallets — searches are not decremented. */
+export const ADMIN_DISPLAY_LIMIT = 9999;
 const SECONDS_PER_DAY = 86_400;
 const BILLED_SEARCH_TTL_SECONDS = 12 * 60;
 
@@ -62,7 +65,22 @@ export function getRequestIdentifier(request: Request): string {
   throw new WalletAuthRequiredError();
 }
 
+function buildAdminUsage(wallet: string): UsageResponse {
+  return {
+    used: 0,
+    limit: ADMIN_DISPLAY_LIMIT,
+    remaining: ADMIN_DISPLAY_LIMIT,
+    tier: "admin",
+    wallet,
+    authenticated: true,
+  };
+}
+
 function buildUsage(used: number, wallet: string | null): UsageResponse {
+  if (wallet && isAdminWallet(wallet)) {
+    return buildAdminUsage(wallet);
+  }
+
   return {
     used,
     limit: FREE_DAILY_LIMIT,
@@ -196,8 +214,12 @@ export async function consumeSearchForAddress(
 export async function consumeSearch(
   request: Request
 ): Promise<UsageResponse> {
-  const identifier = getRequestIdentifier(request);
   const wallet = getWalletFromRequest(request);
+  if (wallet && isAdminWallet(wallet)) {
+    return buildAdminUsage(wallet);
+  }
+
+  const identifier = getRequestIdentifier(request);
 
   const current = await getSearchUsage(request);
   if (current.remaining === 0) {
@@ -209,6 +231,7 @@ export async function consumeSearch(
 }
 
 export function canSearch(usage: UsageResponse): boolean {
+  if (usage.tier === "admin") return usage.authenticated;
   return usage.authenticated && usage.remaining > 0;
 }
 

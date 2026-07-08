@@ -68,7 +68,7 @@ export interface UsageResponse {
   used: number;
   limit: number;
   remaining: number;
-  tier: "free" | "pro";
+  tier: "free" | "pro" | "admin";
   wallet: string | null;
   authenticated: boolean;
 }
