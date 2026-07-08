@@ -3,8 +3,11 @@ import { handleApiError } from "@/lib/api/handle-error";
 import { heliusRpc } from "@/lib/helius/client";
 
 interface BlockhashResult {
-  blockhash: string;
-  lastValidBlockHeight: number;
+  context: { slot: number };
+  value: {
+    blockhash: string;
+    lastValidBlockHeight: number;
+  };
 }
 
 export async function GET() {
@@ -13,9 +16,14 @@ export async function GET() {
       { commitment: "confirmed" },
     ]);
 
+    const { blockhash, lastValidBlockHeight } = result.value;
+    if (!blockhash) {
+      throw new Error("Helius returned an empty blockhash");
+    }
+
     return NextResponse.json({
-      blockhash: result.blockhash,
-      lastValidBlockHeight: result.lastValidBlockHeight,
+      blockhash,
+      lastValidBlockHeight,
     });
   } catch (error) {
     return handleApiError(error);

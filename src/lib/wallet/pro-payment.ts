@@ -171,7 +171,10 @@ async function fetchBlockhash(): Promise<string> {
       (body as { error?: string }).error ?? "Failed to fetch blockhash"
     );
   }
-  const { blockhash } = (await res.json()) as { blockhash: string };
+  const { blockhash } = (await res.json()) as { blockhash?: string };
+  if (!blockhash) {
+    throw new Error("Blockhash missing from server response");
+  }
   return blockhash;
 }
 
