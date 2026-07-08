@@ -33,13 +33,3 @@ export function getStoredWalletName(): string | null {
   return sessionStorage.getItem(ADAPTER_NAME_KEY);
 }
 
-export function isMobileDevice(): boolean {
-  if (typeof navigator === "undefined") return false;
-  return /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent);
-}
-
-export function mobilePaymentHint(walletName: string | null): string | null {
-  if (!isMobileDevice()) return null;
-  const name = walletName ?? "Jupiter";
-  return `On mobile, open Zenerating inside the ${name} app browser (Wallet → Browser), connect, then tap Pay. Safari/Chrome alone cannot sign transactions.`;
-}

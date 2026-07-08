@@ -2,6 +2,7 @@ import { ZodError } from "zod";
 import { apiError } from "@/lib/api-errors";
 import { WalletAuthRequiredError } from "@/lib/auth/errors";
 import { HeliusError } from "@/lib/helius/errors";
+import { ProRequiredError } from "@/lib/pro/access";
 import { RateLimitExceededError } from "@/lib/rate-limit";
 
 export function handleApiError(error: unknown) {
@@ -22,6 +23,14 @@ export function handleApiError(error: unknown) {
       "Daily search limit exceeded. Upgrade to Pro for unlimited searches.",
       "RATE_LIMIT",
       429
+    );
+  }
+
+  if (error instanceof ProRequiredError) {
+    return apiError(
+      "Wallet and token clustering require Pro.",
+      "PRO_REQUIRED",
+      403
     );
   }
 

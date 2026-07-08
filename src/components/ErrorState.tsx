@@ -15,6 +15,8 @@ const MESSAGES: Record<string, string> = {
     "Connect your Solana wallet and sign the login message to start searching.",
   IP_WALLET_LIMIT:
     "This network already used 2 wallets today. Reconnect a previous wallet or upgrade to Pro.",
+  PRO_REQUIRED:
+    "Wallet and token clustering require Pro. Upgrade to unlock funding network maps.",
   TIMEOUT: "The request timed out. Helius may be slow — try again.",
   INTERNAL: "Something went wrong. Please try again.",
 };
@@ -47,7 +49,10 @@ export function ErrorState({ error, onRetry, onUpgrade }: ErrorStateProps) {
       <h2 className="text-lg font-semibold text-accent-red">Error</h2>
       <p className="mt-2 text-sm leading-relaxed text-gray-400">{message}</p>
       <div className="mt-6 flex flex-col justify-center gap-2 sm:flex-row sm:gap-3">
-        {(code === "RATE_LIMIT" || code === "IP_WALLET_LIMIT") && onUpgrade && (
+        {(code === "RATE_LIMIT" ||
+          code === "IP_WALLET_LIMIT" ||
+          code === "PRO_REQUIRED") &&
+          onUpgrade && (
           <button type="button" onClick={onUpgrade} className="btn-primary">
             Upgrade to Pro
           </button>

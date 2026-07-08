@@ -125,6 +125,7 @@ export function ResultsContent() {
   }, [loadResults]);
 
   const isAuthenticated = usage?.authenticated ?? false;
+  const isPro = usage?.tier === "pro" || usage?.tier === "admin";
 
   async function handleSearch(newAddress: string) {
     if (!isAuthenticated) {
@@ -232,7 +233,12 @@ export function ResultsContent() {
 
             {wallet && (
               <div className="crypto-card p-4 sm:p-6">
-                <WalletClusterSection address={address} context="wallet" />
+                <WalletClusterSection
+                  address={address}
+                  context="wallet"
+                  isPro={isPro}
+                  onUpgrade={() => setUpgradeOpen(true)}
+                />
               </div>
             )}
 
@@ -244,6 +250,8 @@ export function ResultsContent() {
                     context="token_creator"
                     creatorAddress={token.creator}
                     tokenSymbol={token.symbol}
+                    isPro={isPro}
+                    onUpgrade={() => setUpgradeOpen(true)}
                   />
                 </div>
 

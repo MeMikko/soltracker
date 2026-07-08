@@ -93,5 +93,6 @@ export interface ApiError {
     | "AUTH_EXPIRED"
     | "AUTH_INVALID"
     | "PAYMENT_INVALID"
-    | "PAYMENT_USED";
+    | "PAYMENT_USED"
+    | "PRO_REQUIRED";
 }

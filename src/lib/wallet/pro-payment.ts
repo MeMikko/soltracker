@@ -21,8 +21,6 @@ import {
 import {
   getStoredWalletAdapterId,
   getStoredWalletName,
-  isMobileDevice,
-  mobilePaymentHint,
   rememberWalletAdapter,
 } from "./payment-provider";
 
@@ -417,37 +415,9 @@ async function tryLegacyPayment(
   return null;
 }
 
-export function getPaymentEnvironmentError(): string | null {
-  const storedName = getStoredWalletName();
-  return mobilePaymentHint(storedName);
-}
-
 export async function preparePaymentWallet(
   expectedWallet: string
 ): Promise<void> {
-  const mobileHint = getPaymentEnvironmentError();
-  if (mobileHint && isMobileDevice()) {
-    const hasStandard = findExistingStandardAccount(
-      expectedWallet,
-      getStoredWalletAdapterId(),
-      getStoredWalletName()
-    );
-    const hasLegacy = legacyInjectForStored(getStoredWalletAdapterId()).some(
-      (inject) => {
-        const provider = inject.getProvider();
-        return (
-          isLegacyProvider(provider) &&
-          provider.publicKey &&
-          pubkeyString(provider.publicKey) === expectedWallet
-        );
-      }
-    );
-
-    if (!hasStandard && !hasLegacy) {
-      throw new Error(mobileHint);
-    }
-  }
-
   const standard = await connectPreferredStandardWallet(expectedWallet);
   if (standard) return;
 
@@ -459,9 +429,9 @@ export async function preparePaymentWallet(
     }
   }
 
-  const walletLabel = getStoredWalletName() ?? "your Solana wallet";
+  const walletLabel = getStoredWalletName() ?? "your wallet";
   throw new Error(
-    `Could not reach ${walletLabel}. Open the ${walletLabel} extension, make sure the same account is selected, then tap Pay again.`
+    `Could not connect ${walletLabel}. Make sure the same account is selected, then try again.`
   );
 }
 
@@ -492,6 +462,6 @@ export async function sendProSubscriptionPayment(
 
   const walletLabel = storedName ?? "wallet";
   throw new Error(
-    `Payment was not approved in ${walletLabel}. Open ${walletLabel}, approve the 0.1 SOL transfer, and try again.`
+    `Payment was not approved. Approve the 0.1 SOL transfer in ${walletLabel} and try again.`
   );
 }

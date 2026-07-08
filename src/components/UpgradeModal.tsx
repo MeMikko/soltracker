@@ -8,13 +8,8 @@ import { truncateAddress } from "@/lib/format";
 import {
   PRO_PERIOD_DAYS,
   PRO_PRICE_SOL,
-  PRO_TREASURY_WALLET,
 } from "@/lib/pro/config";
-import { getStoredWalletName } from "@/lib/wallet/payment-provider";
-import {
-  getPaymentEnvironmentError,
-  sendProSubscriptionPayment,
-} from "@/lib/wallet/pro-payment";
+import { sendProSubscriptionPayment } from "@/lib/wallet/pro-payment";
 import { WalletPickerModal } from "./WalletPickerModal";
 
 interface UpgradeModalProps {
@@ -52,10 +47,7 @@ export function UpgradeModal({ open, onClose }: UpgradeModalProps) {
   const wallet = session?.wallet ?? usage?.wallet ?? null;
   const isSignedIn = Boolean(wallet);
   const isPro = usage?.tier === "pro" || usage?.tier === "admin";
-  const isFreeAtLimit =
-    usage?.tier === "free" && isSignedIn && usage.remaining === 0;
-  const signedInWalletName = getStoredWalletName();
-  const mobileHint = getPaymentEnvironmentError();
+
 
   useEffect(() => {
     if (!open) return;
@@ -144,45 +136,19 @@ export function UpgradeModal({ open, onClose }: UpgradeModalProps) {
           )}
 
           {isSignedIn && !isPro && (
-            <div className="mt-4 rounded-lg border border-zen-border bg-zen-deep/80 px-3 py-2.5 text-xs text-gray-500">
-              <p>
-                Signed in as{" "}
-                <span className="font-mono text-zen-mist">
-                  {truncateAddress(wallet!, 6)}
-                </span>
-              </p>
-              <p className="mt-1">
-                Payment of {PRO_PRICE_SOL} SOL to{" "}
-                <span className="font-mono text-zen-mist">
-                  {truncateAddress(PRO_TREASURY_WALLET, 6)}
-                </span>
-              </p>
-              {signedInWalletName && (
-                <p className="mt-1 text-zen-mist">
-                  Pay with <span className="text-white">{signedInWalletName}</span>{" "}
-                  — the same wallet you signed in with.
-                </p>
-              )}
-              {mobileHint ? (
-                <p className="mt-1 text-accent-red/90">{mobileHint}</p>
-              ) : (
-                <p className="mt-1 text-zen-mist">
-                  Press Pay — {signedInWalletName ?? "your wallet"} will ask to
-                  approve the 0.1 SOL transfer.
-                </p>
-              )}
-              {isFreeAtLimit && (
-                <p className="mt-1 text-accent-red/90">
-                  Daily free searches used — Pro unlocks unlimited access.
-                </p>
-              )}
-            </div>
+            <p className="mt-4 text-xs text-gray-500">
+              Signed in as{" "}
+              <span className="font-mono text-zen-mist">
+                {truncateAddress(wallet!, 6)}
+              </span>
+              . Approve the {PRO_PRICE_SOL} SOL transfer in your wallet.
+            </p>
           )}
 
           {!isSignedIn && (
-            <div className="mt-4 rounded-lg border border-accent-red/20 bg-accent-red/5 px-3 py-2.5 text-xs text-accent-red/90">
-              Connect and sign in with your Solana wallet before paying for Pro.
-            </div>
+            <p className="mt-4 text-xs text-gray-500">
+              Connect your Solana wallet to pay for Pro.
+            </p>
           )}
 
           {!isPro && (

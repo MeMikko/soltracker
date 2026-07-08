@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { handleApiError } from "@/lib/api/handle-error";
 import { peekCacheResult } from "@/lib/cache/peek-cache";
 import { getWalletCluster } from "@/lib/data/cluster-service";
+import { assertProAccess } from "@/lib/pro/access";
 import {
   assertCanSearch,
   consumeSearchForAddress,
@@ -22,6 +23,8 @@ export async function GET(
   try {
     const { address: raw } = await params;
     const address = parseSolanaAddress(decodeURIComponent(raw));
+    await assertProAccess(request);
+
     const cacheKey = `${CLUSTER_CACHE_PREFIX}${address}`;
 
     const cached = await peekCacheResult<ClusterGraph>(cacheKey);

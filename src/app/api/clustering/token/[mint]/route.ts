@@ -4,6 +4,7 @@ import { peekCacheResult } from "@/lib/cache/peek-cache";
 import type { ClusterGraph } from "@/lib/clustering/types";
 import { TOKEN_CACHE_KEY_PREFIX, getTokenData } from "@/lib/data";
 import { getTokenCreatorCluster } from "@/lib/data/cluster-service";
+import { assertProAccess } from "@/lib/pro/access";
 import {
   assertCanSearch,
   consumeSearchForAddress,
@@ -24,6 +25,8 @@ export async function GET(
   try {
     const { mint: raw } = await params;
     const mintAddress = parseSolanaAddress(decodeURIComponent(raw));
+    await assertProAccess(request);
+
     const cacheKey = `${TOKEN_CLUSTER_CACHE_PREFIX}${mintAddress}`;
 
     const clusterCached = await peekCacheResult<ClusterGraph>(cacheKey);

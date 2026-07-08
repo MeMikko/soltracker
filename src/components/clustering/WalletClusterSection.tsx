@@ -6,6 +6,7 @@ import { ZENERATING, ZEN_BRAND } from "@/lib/brand/zenerating";
 import type { ClusterContext, ClusterGraph } from "@/lib/clustering/types";
 import type { ApiError } from "@/lib/types";
 import { truncateAddress } from "@/lib/format";
+import { ProLockedOverlay } from "@/components/ProLockedOverlay";
 import { WalletClusterGraph } from "./WalletClusterGraph";
 
 interface WalletClusterSectionProps {
@@ -13,6 +14,8 @@ interface WalletClusterSectionProps {
   context?: ClusterContext;
   creatorAddress?: string | null;
   tokenSymbol?: string | null;
+  isPro?: boolean;
+  onUpgrade?: () => void;
 }
 
 export function WalletClusterSection({
@@ -20,6 +23,8 @@ export function WalletClusterSection({
   context = "wallet",
   creatorAddress,
   tokenSymbol,
+  isPro = false,
+  onUpgrade,
 }: WalletClusterSectionProps) {
   const [graph, setGraph] = useState<ClusterGraph | null>(null);
   const [loading, setLoading] = useState(true);
@@ -28,6 +33,13 @@ export function WalletClusterSection({
   const isTokenCreator = context === "token_creator";
 
   useEffect(() => {
+    if (!isPro) {
+      setGraph(null);
+      setError(null);
+      setLoading(false);
+      return;
+    }
+
     let cancelled = false;
 
     async function load() {
@@ -64,7 +76,7 @@ export function WalletClusterSection({
     return () => {
       cancelled = true;
     };
-  }, [address, context, creatorAddress, isTokenCreator]);
+  }, [address, context, creatorAddress, isTokenCreator, isPro]);
 
   const title = isTokenCreator
     ? ZEN_BRAND.voice.creatorClusterTitle
@@ -123,7 +135,11 @@ export function WalletClusterSection({
         )}
       </div>
 
-      {loading ? (
+      {!isPro && onUpgrade ? (
+        <ProLockedOverlay onUpgrade={onUpgrade} title="Clustering is Pro">
+          <ClusterPreviewPlaceholder />
+        </ProLockedOverlay>
+      ) : loading ? (
         <div className="flex h-[420px] items-center justify-center rounded-xl border border-zen-border bg-zen-deep sm:h-[480px]">
           <p className="text-sm text-zen-mist">{loadingMessage}</p>
         </div>
@@ -171,6 +187,30 @@ function StatPill({
         {value}
       </span>
     </span>
+  );
+}
+
+function ClusterPreviewPlaceholder() {
+  return (
+    <div className="flex h-[420px] items-center justify-center p-8 sm:h-[480px]">
+      <div className="relative h-full w-full max-w-2xl">
+        <span className="absolute left-[18%] top-[22%] h-14 w-14 rounded-full border border-zen-sage/30 bg-zen-sage/20" />
+        <span className="absolute right-[20%] top-[30%] h-10 w-10 rounded-full border border-accent-red/25 bg-accent-red/15" />
+        <span className="absolute bottom-[28%] left-[32%] h-12 w-12 rounded-full border border-zen-border bg-zen-card" />
+        <span className="absolute bottom-[22%] right-[28%] h-9 w-9 rounded-full border border-zen-border bg-zen-card" />
+        <span className="absolute left-[42%] top-[46%] h-16 w-16 rounded-full border-2 border-zen-sage/40 bg-zen-sage/10" />
+        <svg
+          className="absolute inset-0 h-full w-full text-zen-border"
+          viewBox="0 0 400 300"
+          aria-hidden
+        >
+          <line x1="120" y1="90" x2="200" y2="150" stroke="currentColor" strokeWidth="1" />
+          <line x1="280" y1="110" x2="200" y2="150" stroke="currentColor" strokeWidth="1" />
+          <line x1="160" y1="210" x2="200" y2="150" stroke="currentColor" strokeWidth="1" />
+          <line x1="260" y1="200" x2="200" y2="150" stroke="currentColor" strokeWidth="1" />
+        </svg>
+      </div>
+    </div>
   );
 }
 
