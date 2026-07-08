@@ -22,11 +22,15 @@ import {
 
 const nodeTypes = { walletCluster: WalletClusterNode };
 
-const EDGE_COLORS = {
+const EDGE_COLORS: Record<
+  import("@/lib/clustering/types").ClusterEdgeType,
+  string
+> = {
   shared_funding: ZEN_BRAND.colors.sage,
   temporal: ZEN_BRAND.colors.mist,
   shared_token: ZEN_BRAND.colors.sand,
-} as const;
+  token_launch: "#9945ff",
+};
 
 const RISK_MINIMAP: Record<WalletClusterNodeData["riskLevel"], string> = {
   low: ZEN_BRAND.colors.low,
@@ -34,33 +38,53 @@ const RISK_MINIMAP: Record<WalletClusterNodeData["riskLevel"], string> = {
   high: ZEN_BRAND.colors.high,
 };
 
-function layoutNodes(graph: ClusterGraph): Node<WalletClusterNodeData>[] {
-  const seed = graph.nodes.find((n) => n.role === "seed") ?? graph.nodes[0];
-  const others = graph.nodes.filter((n) => n.id !== seed?.id);
-  const centerX = 280;
-  const centerY = 220;
-  const radius = 160;
+function nodeData(node: ClusterGraph["nodes"][number]): WalletClusterNodeData {
+  return {
+    label: node.label,
+    address: node.address,
+    role: node.role,
+    riskLevel: node.riskLevel,
+    riskScore: node.riskScore,
+    sharedTokens: node.sharedTokens,
+  };
+}
 
+function layoutNodes(graph: ClusterGraph): Node<WalletClusterNodeData>[] {
+  const center =
+    graph.nodes.find((n) => n.role === "creator") ??
+    graph.nodes.find((n) => n.role === "seed") ??
+    graph.nodes[0];
+  const mintNode = graph.nodes.find((n) => n.role === "mint");
+  const orbit = graph.nodes.filter(
+    (n) => n.id !== center?.id && n.id !== mintNode?.id
+  );
+
+  const centerX = 280;
+  const centerY = 200;
+  const radius = 160;
   const positioned: Node<WalletClusterNodeData>[] = [];
 
-  if (seed) {
+  if (center) {
     positioned.push({
-      id: seed.id,
+      id: center.id,
       type: "walletCluster",
       position: { x: centerX, y: centerY },
-      data: {
-        label: seed.label,
-        address: seed.address,
-        role: seed.role,
-        riskLevel: seed.riskLevel,
-        riskScore: seed.riskScore,
-        sharedTokens: seed.sharedTokens,
-      },
+      data: nodeData(center),
     });
   }
 
-  others.forEach((node, index) => {
-    const angle = (index / Math.max(others.length, 1)) * Math.PI * 2 - Math.PI / 2;
+  if (mintNode) {
+    positioned.push({
+      id: mintNode.id,
+      type: "walletCluster",
+      position: { x: centerX + 20, y: centerY + 110 },
+      data: nodeData(mintNode),
+    });
+  }
+
+  orbit.forEach((node, index) => {
+    const angle =
+      (index / Math.max(orbit.length, 1)) * Math.PI * 2 - Math.PI / 2;
     positioned.push({
       id: node.id,
       type: "walletCluster",
@@ -68,14 +92,7 @@ function layoutNodes(graph: ClusterGraph): Node<WalletClusterNodeData>[] {
         x: centerX + Math.cos(angle) * radius,
         y: centerY + Math.sin(angle) * radius,
       },
-      data: {
-        label: node.label,
-        address: node.address,
-        role: node.role,
-        riskLevel: node.riskLevel,
-        riskScore: node.riskScore,
-        sharedTokens: node.sharedTokens,
-      },
+      data: nodeData(node),
     });
   });
 
@@ -88,7 +105,7 @@ function toFlowEdges(graph: ClusterGraph): Edge[] {
     source: edge.source,
     target: edge.target,
     label: edge.label,
-    animated: edge.type === "temporal",
+    animated: edge.type === "temporal" || edge.type === "token_launch",
     style: {
       stroke: EDGE_COLORS[edge.type],
       strokeWidth: 1 + edge.weight * 0.6,
@@ -193,6 +210,9 @@ export function WalletClusterGraph({
         <LegendDot color={EDGE_COLORS.shared_funding} label="Shared funding" />
         <LegendDot color={EDGE_COLORS.temporal} label="Temporal overlap" />
         <LegendDot color={EDGE_COLORS.shared_token} label="Shared tokens" />
+        {graph.meta.context === "token_creator" && (
+          <LegendDot color={EDGE_COLORS.token_launch} label="Token launch" />
+        )}
       </div>
     </div>
   );

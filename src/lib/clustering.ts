@@ -1,3 +1,4 @@
+import { HeliusError } from "@/lib/helius/errors";
 import { hasHeliusApiKey } from "@/lib/helius/client";
 import { fetchWalletTransfers } from "./clustering/transfers";
 import type {
@@ -41,7 +42,7 @@ function estimateNodeRisk(
 ): number {
   let score = 62;
 
-  if (role === "seed") score = 58;
+  if (role === "seed" || role === "creator") score = 58;
   if (role === "funder" && inboundSol === 0) score -= 12;
   if (txCount < 5) score -= 18;
   if (txCount > 200) score += 8;
@@ -322,11 +323,99 @@ function mockCluster(seedAddress: string): ClusterGraph {
     meta: {
       computedAt: new Date().toISOString(),
       heuristicVersion: CLUSTER_HEURISTIC_VERSION,
+      context: "wallet",
       signalCounts: {
         shared_funding: 2,
         temporal: 1,
         shared_token: 1,
+        token_launch: 0,
       },
+    },
+  };
+}
+
+function emptySignalCounts(): Record<
+  import("./clustering/types").ClusterEdgeType,
+  number
+> {
+  return {
+    shared_funding: 0,
+    temporal: 0,
+    shared_token: 0,
+    token_launch: 0,
+  };
+}
+
+export interface TokenCreatorClusterInput {
+  mintAddress: string;
+  creatorWallet: string | null;
+  symbol: string | null;
+  name: string | null;
+}
+
+export async function buildTokenCreatorCluster(
+  input: TokenCreatorClusterInput
+): Promise<ClusterGraph> {
+  const { mintAddress, creatorWallet, symbol, name } = input;
+
+  if (!creatorWallet) {
+    throw new HeliusError(
+      "Token creator could not be identified for clustering",
+      "NOT_FOUND"
+    );
+  }
+
+  const base = await buildWalletCluster(creatorWallet);
+  const tokenLabel = symbol ?? name ?? truncateLabel(mintAddress);
+
+  const nodes: ClusterNode[] = base.nodes.map((node) =>
+    node.address === creatorWallet
+      ? {
+          ...node,
+          role: "creator",
+          label: "Token creator",
+        }
+      : node
+  );
+
+  nodes.push({
+    id: mintAddress,
+    address: mintAddress,
+    label: tokenLabel,
+    role: "mint",
+    riskLevel: "medium",
+    riskScore: 52,
+    sharedTokens: symbol ? [symbol] : undefined,
+  });
+
+  const launchEdge: ClusterEdge = {
+    id: edgeId(creatorWallet, mintAddress, "token_launch"),
+    source: creatorWallet,
+    target: mintAddress,
+    type: "token_launch",
+    weight: 2.5,
+    label: "Deployed token",
+  };
+
+  const edges = [...base.edges, launchEdge];
+  const signalCounts = { ...emptySignalCounts() };
+  for (const edge of edges) {
+    signalCounts[edge.type] += 1;
+  }
+
+  return {
+    seedAddress: creatorWallet,
+    nodes,
+    edges,
+    meta: {
+      computedAt: new Date().toISOString(),
+      heuristicVersion: CLUSTER_HEURISTIC_VERSION,
+      context: "token_creator",
+      signalCounts,
+      mintAddress,
+      creatorAddress: creatorWallet,
+      tokenSymbol: symbol,
+      tokenName: name,
     },
   };
 }
@@ -363,11 +452,10 @@ export async function buildWalletCluster(
   const transferStats = buildTransferStats(transfers);
   const nodes = buildNodes(seedAddress, edges, tokenMap, transferStats);
 
-  const signalCounts: Record<ClusterEdgeType, number> = {
-    shared_funding: edges.filter((e) => e.type === "shared_funding").length,
-    temporal: edges.filter((e) => e.type === "temporal").length,
-    shared_token: edges.filter((e) => e.type === "shared_token").length,
-  };
+  const signalCounts = emptySignalCounts();
+  for (const edge of edges) {
+    signalCounts[edge.type] += 1;
+  }
 
   return {
     seedAddress,
@@ -376,6 +464,7 @@ export async function buildWalletCluster(
     meta: {
       computedAt: new Date().toISOString(),
       heuristicVersion: CLUSTER_HEURISTIC_VERSION,
+      context: "wallet",
       signalCounts,
     },
   };

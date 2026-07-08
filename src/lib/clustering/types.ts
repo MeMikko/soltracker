@@ -1,6 +1,18 @@
-export type ClusterEdgeType = "shared_funding" | "temporal" | "shared_token";
+export type ClusterEdgeType =
+  | "shared_funding"
+  | "temporal"
+  | "shared_token"
+  | "token_launch";
 
-export type ClusterNodeRole = "seed" | "funder" | "recipient" | "peer";
+export type ClusterNodeRole =
+  | "seed"
+  | "creator"
+  | "mint"
+  | "funder"
+  | "recipient"
+  | "peer";
+
+export type ClusterContext = "wallet" | "token_creator";
 
 export type ClusterRiskLevel = "low" | "medium" | "high";
 
@@ -32,7 +44,12 @@ export interface ClusterGraph {
   meta: {
     computedAt: string;
     heuristicVersion: string;
+    context: ClusterContext;
     signalCounts: Record<ClusterEdgeType, number>;
+    mintAddress?: string;
+    creatorAddress?: string;
+    tokenSymbol?: string | null;
+    tokenName?: string | null;
   };
 }
 

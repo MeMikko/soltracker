@@ -215,7 +215,18 @@ export function ResultsContent() {
 
             {wallet && (
               <div className="crypto-card p-4 sm:p-6">
-                <WalletClusterSection address={address} />
+                <WalletClusterSection address={address} context="wallet" />
+              </div>
+            )}
+
+            {token && (
+              <div className="crypto-card p-4 sm:p-6">
+                <WalletClusterSection
+                  address={address}
+                  context="token_creator"
+                  creatorAddress={token.creator}
+                  tokenSymbol={token.symbol}
+                />
               </div>
             )}
           </div>

@@ -122,3 +122,22 @@ export async function fetchCluster(
   const { data, usage } = extractUsage(body);
   return { ok: true, data, usage };
 }
+
+export async function fetchTokenCreatorCluster(
+  mint: string
+): Promise<ApiSuccess<ClusterGraph> | ApiFailure> {
+  const res = await fetch(
+    `/api/clustering/token/${encodeURIComponent(mint)}`,
+    fetchOptions
+  );
+  const body = await parseJson<
+    ClusterGraph & { usage?: UsageResponse; source?: string } & ApiError
+  >(res);
+
+  if (!res.ok) {
+    return { ok: false, error: body, status: res.status };
+  }
+
+  const { data, usage } = extractUsage(body);
+  return { ok: true, data, usage };
+}

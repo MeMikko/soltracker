@@ -29,8 +29,15 @@ export const ZEN_BRAND = {
     clusterTitle: "Wallet Network",
     clusterSubtitle:
       "Funding paths, timing overlaps, and shared holdings — mapped with clarity.",
+    creatorClusterTitle: "Creator Funding Network",
+    creatorClusterSubtitle:
+      "Who funded this token's creator — trace SOL flows, timing, and shared wallets before you buy.",
     emptyCluster: "No significant connections detected for this address yet.",
+    emptyCreatorCluster:
+      "No creator funding paths detected yet. The deployer may be new or use indirect funding.",
+    noCreator: "Token creator could not be identified — clustering unavailable for this mint.",
     loadingCluster: "Mapping wallet connections…",
+    loadingCreatorCluster: "Tracing creator funding network…",
   },
 } as const;
 

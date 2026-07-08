@@ -22,14 +22,21 @@ const RISK_RING: Record<ClusterRiskLevel, string> = {
 
 const ROLE_LABEL: Record<ClusterNodeRole, string> = {
   seed: "Seed",
+  creator: "Creator",
+  mint: "Token",
   funder: "Funder",
   recipient: "Recipient",
   peer: "Peer",
 };
 
+const ROLE_RING: Partial<Record<ClusterNodeRole, string>> = {
+  mint: "#9945ff",
+  creator: ZEN_BRAND.colors.sage,
+};
+
 function WalletClusterNodeComponent({ data, selected }: NodeProps) {
   const nodeData = data as WalletClusterNodeData;
-  const ring = RISK_RING[nodeData.riskLevel];
+  const ring = ROLE_RING[nodeData.role] ?? RISK_RING[nodeData.riskLevel];
 
   return (
     <div
