@@ -151,6 +151,9 @@ export function UpgradeModal({ open, onClose }: UpgradeModalProps) {
                   {truncateAddress(PRO_TREASURY_WALLET, 6)}
                 </span>
               </p>
+              <p className="mt-1 text-zen-mist">
+                Press Pay — your wallet extension will ask to approve the transfer.
+              </p>
               {isFreeAtLimit && (
                 <p className="mt-1 text-accent-red/90">
                   Daily free searches used — Pro unlocks unlimited access.
@@ -227,16 +230,8 @@ export function UpgradeModal({ open, onClose }: UpgradeModalProps) {
                   className="btn-primary flex-1 disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   {loading
-                    ? "Confirming payment…"
+                    ? "Approve in wallet…"
                     : `Pay ${PRO_PRICE_SOL} SOL / month`}
-                </button>
-                <button
-                  type="button"
-                  onClick={beginConnect}
-                  disabled={connecting || loading}
-                  className="btn-ghost flex-1 sm:flex-initial"
-                >
-                  Reauthorize wallet
                 </button>
               </>
             )}

@@ -17,7 +17,8 @@ interface TransferTx {
   blockTime: number | null;
   transaction: {
     message: {
-      accountKeys: Array<string | AccountKey>;
+      accountKeys?: Array<string | AccountKey>;
+      staticAccountKeys?: Array<string | AccountKey>;
     };
   };
 }
@@ -35,7 +36,11 @@ export function parseTransferAmount(
 ): number | null {
   if (!tx.meta || tx.meta.err) return null;
 
-  const keys = accountPubkeys(tx.transaction.message.accountKeys);
+  const keys = accountPubkeys(
+    tx.transaction.message.accountKeys ??
+      tx.transaction.message.staticAccountKeys ??
+      []
+  );
   const fromIdx = keys.indexOf(fromWallet);
   const toIdx = keys.indexOf(toWallet);
 
