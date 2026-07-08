@@ -13,6 +13,7 @@ export interface WalletClusterNodeData extends Record<string, unknown> {
   riskScore: number;
   sharedTokens?: string[];
   flags?: string[];
+  compact?: boolean;
 }
 
 const RISK_RING: Record<ClusterRiskLevel, string> = {
@@ -41,12 +42,13 @@ const ROLE_RING: Partial<Record<ClusterNodeRole, string>> = {
 function WalletClusterNodeComponent({ data, selected }: NodeProps) {
   const nodeData = data as WalletClusterNodeData;
   const ring = ROLE_RING[nodeData.role] ?? RISK_RING[nodeData.riskLevel];
+  const compact = nodeData.compact ?? false;
 
   return (
     <div
-      className={`min-w-[132px] rounded-xl border bg-zen-card px-3 py-2.5 shadow-zen transition-shadow ${
-        selected ? "shadow-zen-lg" : ""
-      }`}
+      className={`rounded-xl border bg-zen-card shadow-zen transition-shadow ${
+        compact ? "min-w-[100px] px-2 py-2" : "min-w-[132px] px-3 py-2.5"
+      } ${selected ? "shadow-zen-lg" : ""}`}
       style={{
         borderColor: `${ring}55`,
         boxShadow: selected ? `0 0 0 1px ${ring}66` : undefined,
@@ -65,23 +67,33 @@ function WalletClusterNodeComponent({ data, selected }: NodeProps) {
           aria-hidden
         />
         <div className="min-w-0">
-          <p className="truncate text-xs font-medium text-gray-200">
+          <p
+            className={`truncate font-medium text-gray-200 ${
+              compact ? "text-[10px]" : "text-xs"
+            }`}
+          >
             {nodeData.label}
           </p>
-          <p className="font-mono text-[10px] text-gray-500">
-            {nodeData.address.slice(0, 4)}…{nodeData.address.slice(-4)}
-          </p>
+          {!compact && (
+            <p className="font-mono text-[10px] text-gray-500">
+              {nodeData.address.slice(0, 4)}…{nodeData.address.slice(-4)}
+            </p>
+          )}
         </div>
       </div>
 
-      <div className="mt-2 flex items-center justify-between gap-2 text-[10px]">
-        <span className="rounded-full border border-zen-border/80 bg-zen-deep/60 px-2 py-0.5 text-zen-mist">
+      <div
+        className={`flex items-center justify-between gap-2 text-[10px] ${
+          compact ? "mt-1" : "mt-2"
+        }`}
+      >
+        <span className="rounded-full border border-zen-border/80 bg-zen-deep/60 px-1.5 py-0.5 text-zen-mist">
           {ROLE_LABEL[nodeData.role]}
         </span>
         <span className="font-mono text-gray-400">{nodeData.riskScore}</span>
       </div>
 
-      {nodeData.flags && nodeData.flags.length > 0 && (
+      {!compact && nodeData.flags && nodeData.flags.length > 0 && (
         <div className="mt-1.5 flex flex-wrap gap-1">
           {nodeData.flags.slice(0, 2).map((flag) => (
             <span
