@@ -13,9 +13,9 @@ import type { UsageResponse } from "@/lib/types";
 import type { TokenChainData } from "@/lib/helius/index";
 import { parseSolanaAddress } from "@/lib/validation";
 
-export const maxDuration = 30;
+export const maxDuration = 60;
 
-const TOKEN_CLUSTER_CACHE_PREFIX = "cluster:v1:token:";
+const TOKEN_CLUSTER_CACHE_PREFIX = "cluster:v2:token:";
 
 export async function GET(
   request: Request,

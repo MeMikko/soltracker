@@ -12,6 +12,7 @@ export interface WalletClusterNodeData extends Record<string, unknown> {
   riskLevel: ClusterRiskLevel;
   riskScore: number;
   sharedTokens?: string[];
+  flags?: string[];
 }
 
 const RISK_RING: Record<ClusterRiskLevel, string> = {
@@ -25,6 +26,7 @@ const ROLE_LABEL: Record<ClusterNodeRole, string> = {
   creator: "Creator",
   mint: "Token",
   funder: "Funder",
+  sibling: "Sibling",
   recipient: "Recipient",
   peer: "Peer",
 };
@@ -32,6 +34,8 @@ const ROLE_LABEL: Record<ClusterNodeRole, string> = {
 const ROLE_RING: Partial<Record<ClusterNodeRole, string>> = {
   mint: "#9945ff",
   creator: ZEN_BRAND.colors.sage,
+  sibling: ZEN_BRAND.colors.sand,
+  funder: ZEN_BRAND.colors.mist,
 };
 
 function WalletClusterNodeComponent({ data, selected }: NodeProps) {
@@ -76,6 +80,19 @@ function WalletClusterNodeComponent({ data, selected }: NodeProps) {
         </span>
         <span className="font-mono text-gray-400">{nodeData.riskScore}</span>
       </div>
+
+      {nodeData.flags && nodeData.flags.length > 0 && (
+        <div className="mt-1.5 flex flex-wrap gap-1">
+          {nodeData.flags.slice(0, 2).map((flag) => (
+            <span
+              key={flag}
+              className="rounded border border-accent-red/25 bg-accent-red/10 px-1.5 py-0.5 text-[9px] text-accent-red/90"
+            >
+              {flag}
+            </span>
+          ))}
+        </div>
+      )}
 
       <Handle
         type="source"

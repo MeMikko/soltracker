@@ -31,7 +31,7 @@ export const ZEN_BRAND = {
       "Funding paths, timing overlaps, and shared holdings — mapped with clarity.",
     creatorClusterTitle: "Creator Funding Network",
     creatorClusterSubtitle:
-      "Who funded this token's creator — trace SOL flows, timing, and shared wallets before you buy.",
+      "Trace who funded the creator, sibling wallets from the same funder, coordinated buyers, and prior risky deploys.",
     emptyCluster: "No significant connections detected for this address yet.",
     emptyCreatorCluster:
       "No creator funding paths detected yet. The deployer may be new or use indirect funding.",

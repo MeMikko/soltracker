@@ -1,5 +1,9 @@
 import { HeliusError } from "@/lib/helius/errors";
 import { hasHeliusApiKey } from "@/lib/helius/client";
+import {
+  buildExpandedNode,
+  expandCreatorFunderNetwork,
+} from "./clustering/funder-expansion";
 import { fetchWalletTransfers } from "./clustering/transfers";
 import type {
   ClusterEdge,
@@ -11,7 +15,7 @@ import type {
   SolTransfer,
 } from "./clustering/types";
 
-export const CLUSTER_HEURISTIC_VERSION = "zen-v1";
+export const CLUSTER_HEURISTIC_VERSION = "zen-v2";
 const TEMPORAL_WINDOW_SEC = 3600;
 const MIN_SOL_LAMPORTS = 10_000_000; // 0.01 SOL
 
@@ -329,6 +333,8 @@ function mockCluster(seedAddress: string): ClusterGraph {
         temporal: 1,
         shared_token: 1,
         token_launch: 0,
+        coordinated_buy: 0,
+        rug_link: 0,
       },
     },
   };
@@ -343,6 +349,161 @@ function emptySignalCounts(): Record<
     temporal: 0,
     shared_token: 0,
     token_launch: 0,
+    coordinated_buy: 0,
+    rug_link: 0,
+  };
+}
+
+function mockTokenCreatorCluster(
+  input: TokenCreatorClusterInput
+): ClusterGraph {
+  const { mintAddress, creatorWallet, symbol, name } = input;
+  if (!creatorWallet) {
+    throw new HeliusError(
+      "Token creator could not be identified for clustering",
+      "NOT_FOUND"
+    );
+  }
+
+  const funder1 = `${creatorWallet.slice(0, 30)}f1`.padEnd(44, "1").slice(0, 44);
+  const funder2 = `${creatorWallet.slice(0, 30)}f2`.padEnd(44, "2").slice(0, 44);
+  const sibling1 = `${creatorWallet.slice(0, 30)}s1`.padEnd(44, "3").slice(0, 44);
+  const sibling2 = `${creatorWallet.slice(0, 30)}s2`.padEnd(44, "4").slice(0, 44);
+  const tokenLabel = symbol ?? name ?? truncateLabel(mintAddress);
+
+  const edges: ClusterEdge[] = [
+    {
+      id: edgeId(funder1, creatorWallet, "shared_funding"),
+      source: funder1,
+      target: creatorWallet,
+      type: "shared_funding",
+      weight: 2.2,
+      label: "Funded 1.50 SOL",
+    },
+    {
+      id: edgeId(funder1, sibling1, "shared_funding"),
+      source: funder1,
+      target: sibling1,
+      type: "shared_funding",
+      weight: 1.8,
+      label: "Funded 0.80 SOL",
+    },
+    {
+      id: edgeId(funder1, sibling2, "shared_funding"),
+      source: funder1,
+      target: sibling2,
+      type: "shared_funding",
+      weight: 1.6,
+      label: "Funded 0.65 SOL",
+    },
+    {
+      id: edgeId(sibling1, mintAddress, "coordinated_buy"),
+      source: sibling1,
+      target: mintAddress,
+      type: "coordinated_buy",
+      weight: 2.2,
+      label: `Holds ${tokenLabel}`,
+    },
+    {
+      id: edgeId(sibling2, mintAddress, "coordinated_buy"),
+      source: sibling2,
+      target: mintAddress,
+      type: "coordinated_buy",
+      weight: 2.2,
+      label: `Holds ${tokenLabel}`,
+    },
+    {
+      id: edgeId(funder1, sibling2, "rug_link"),
+      source: funder1,
+      target: sibling2,
+      type: "rug_link",
+      weight: 2.1,
+      label: "Prior deploy (1)",
+    },
+    {
+      id: edgeId(creatorWallet, mintAddress, "token_launch"),
+      source: creatorWallet,
+      target: mintAddress,
+      type: "token_launch",
+      weight: 2.5,
+      label: "Deployed token",
+    },
+  ];
+
+  const nodes: ClusterNode[] = [
+    {
+      id: creatorWallet,
+      address: creatorWallet,
+      label: "Token creator",
+      role: "creator",
+      riskLevel: "medium",
+      riskScore: 58,
+    },
+    {
+      id: mintAddress,
+      address: mintAddress,
+      label: tokenLabel,
+      role: "mint",
+      riskLevel: "medium",
+      riskScore: 52,
+      sharedTokens: symbol ? [symbol] : undefined,
+    },
+    {
+      id: funder1,
+      address: funder1,
+      label: truncateLabel(funder1),
+      role: "funder",
+      riskLevel: "high",
+      riskScore: 32,
+      flags: ["Coordinated funding", "Funded prior deployer"],
+    },
+    {
+      id: sibling1,
+      address: sibling1,
+      label: `Buyer ${truncateLabel(sibling1)}`,
+      role: "sibling",
+      riskLevel: "high",
+      riskScore: 34,
+      flags: ["Holds target token"],
+    },
+    {
+      id: sibling2,
+      address: sibling2,
+      label: `Buyer ${truncateLabel(sibling2)}`,
+      role: "sibling",
+      riskLevel: "high",
+      riskScore: 28,
+      flags: ["Holds target token", "1 prior risky deploy"],
+    },
+  ];
+
+  const signalCounts = emptySignalCounts();
+  for (const edge of edges) signalCounts[edge.type] += 1;
+
+  return {
+    seedAddress: creatorWallet,
+    nodes,
+    edges,
+    meta: {
+      computedAt: new Date().toISOString(),
+      heuristicVersion: CLUSTER_HEURISTIC_VERSION,
+      context: "token_creator",
+      signalCounts,
+      mintAddress,
+      creatorAddress: creatorWallet,
+      tokenSymbol: symbol,
+      tokenName: name,
+      coordinatedBuyers: 2,
+      funderAlerts: [
+        {
+          funder: funder1,
+          signals: [
+            "Funded 2 wallets holding this token",
+            "Linked to 1 prior risky pump deploy",
+          ],
+        },
+      ],
+    },
   };
 }
 
@@ -365,28 +526,12 @@ export async function buildTokenCreatorCluster(
     );
   }
 
+  if (!hasHeliusApiKey()) {
+    return mockTokenCreatorCluster(input);
+  }
+
   const base = await buildWalletCluster(creatorWallet);
   const tokenLabel = symbol ?? name ?? truncateLabel(mintAddress);
-
-  const nodes: ClusterNode[] = base.nodes.map((node) =>
-    node.address === creatorWallet
-      ? {
-          ...node,
-          role: "creator",
-          label: "Token creator",
-        }
-      : node
-  );
-
-  nodes.push({
-    id: mintAddress,
-    address: mintAddress,
-    label: tokenLabel,
-    role: "mint",
-    riskLevel: "medium",
-    riskScore: 52,
-    sharedTokens: symbol ? [symbol] : undefined,
-  });
 
   const launchEdge: ClusterEdge = {
     id: edgeId(creatorWallet, mintAddress, "token_launch"),
@@ -397,8 +542,70 @@ export async function buildTokenCreatorCluster(
     label: "Deployed token",
   };
 
-  const edges = [...base.edges, launchEdge];
-  const signalCounts = { ...emptySignalCounts() };
+  let edges = [...base.edges, launchEdge];
+
+  const expansion = await expandCreatorFunderNetwork(
+    creatorWallet,
+    mintAddress,
+    symbol ?? name,
+    edges
+  );
+  edges = [...edges, ...expansion.edges];
+
+  const addresses = new Set<string>([creatorWallet, mintAddress]);
+  for (const edge of edges) {
+    addresses.add(edge.source);
+    addresses.add(edge.target);
+  }
+
+  const tokenMap = new Map<string, string[]>();
+  for (const node of base.nodes) {
+    if (node.sharedTokens?.length) {
+      tokenMap.set(node.address, node.sharedTokens);
+    }
+  }
+  if (symbol) {
+    for (const [address, flags] of expansion.nodeFlags) {
+      if (flags.includes("Holds target token")) {
+        tokenMap.set(address, [symbol]);
+      }
+    }
+  }
+
+  const nodes = [...addresses].map((address) => {
+    const built = buildExpandedNode(
+      address,
+      creatorWallet,
+      mintAddress,
+      edges,
+      expansion.nodeFlags,
+      tokenMap,
+      expansion.transferStats
+    );
+
+    if (address === mintAddress) {
+      return {
+        ...built,
+        label: tokenLabel,
+        role: "mint" as const,
+        riskLevel: "medium" as const,
+        riskScore: 52,
+        sharedTokens: symbol ? [symbol] : built.sharedTokens,
+      };
+    }
+
+    if (address === creatorWallet) {
+      return {
+        ...built,
+        label: "Token creator",
+        role: "creator" as const,
+      };
+    }
+
+    return built;
+  });
+
+  const signalCounts = emptySignalCounts();
   for (const edge of edges) {
     signalCounts[edge.type] += 1;
   }
@@ -416,6 +623,8 @@ export async function buildTokenCreatorCluster(
       creatorAddress: creatorWallet,
       tokenSymbol: symbol,
       tokenName: name,
+      coordinatedBuyers: expansion.coordinatedBuyers,
+      funderAlerts: expansion.funderAlerts,
     },
   };
 }

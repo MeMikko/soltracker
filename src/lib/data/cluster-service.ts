@@ -5,13 +5,19 @@ import {
   buildWalletCluster,
   type TokenCreatorClusterInput,
 } from "@/lib/clustering";
-import type { ClusterGraph, ClusterNode, ClusterEdge } from "@/lib/clustering/types";
+import type {
+  ClusterGraph,
+  ClusterNode,
+  ClusterEdge,
+  FunderAlert,
+} from "@/lib/clustering/types";
+import { CLUSTER_HEURISTIC_VERSION } from "@/lib/clustering";
 import { prisma } from "@/lib/db";
 import { withDbFallback } from "@/lib/db-safe";
 import type { Prisma } from "@prisma/client";
 
-const CLUSTER_CACHE_PREFIX = "cluster:v1:";
-const TOKEN_CLUSTER_CACHE_PREFIX = "cluster:v1:token:";
+const CLUSTER_CACHE_PREFIX = "cluster:v2:";
+const TOKEN_CLUSTER_CACHE_PREFIX = "cluster:v2:token:";
 
 function walletClusterCacheKey(address: string): string {
   return `${CLUSTER_CACHE_PREFIX}${address}`;
@@ -94,6 +100,75 @@ async function persistCluster(graph: ClusterGraph): Promise<void> {
   );
 }
 
+function deriveTokenClusterMeta(
+  nodes: ClusterNode[],
+  edges: ClusterEdge[],
+  mintAddress?: string
+): Pick<
+  ClusterGraph["meta"],
+  "coordinatedBuyers" | "funderAlerts"
+> {
+  const coordinatedBuyers = edges.filter(
+    (e) => e.type === "coordinated_buy"
+  ).length;
+
+  const funderAlerts: FunderAlert[] = [];
+  const funders = nodes.filter((n) => n.role === "funder");
+
+  for (const funder of funders) {
+    const signals: string[] = [];
+    const siblingTargets = edges
+      .filter(
+        (e) =>
+          e.type === "shared_funding" &&
+          e.source === funder.address &&
+          e.target !== mintAddress
+      )
+      .map((e) => e.target);
+
+    const coordinatedCount = edges.filter(
+      (e) =>
+        e.type === "coordinated_buy" &&
+        siblingTargets.includes(e.source)
+    ).length;
+
+    const rugCount = edges.filter(
+      (e) => e.type === "rug_link" && e.source === funder.address
+    ).length;
+
+    if (coordinatedCount >= 2) {
+      signals.push(
+        `Funded ${coordinatedCount} wallets holding this token`
+      );
+    }
+    if (rugCount > 0) {
+      const priorDeploys = edges
+        .filter(
+          (e) => e.type === "rug_link" && e.source === funder.address
+        )
+        .reduce((sum, e) => {
+          const match = e.label.match(/\((\d+)\)/);
+          return sum + (match ? Number(match[1]) : 1);
+        }, 0);
+      signals.push(
+        `Linked to ${priorDeploys} prior risky pump deploy${priorDeploys > 1 ? "s" : ""}`
+      );
+    }
+    if (siblingTargets.length >= 3) {
+      signals.push(`Funded ${siblingTargets.length} sibling wallets`);
+    }
+
+    if (signals.length > 0) {
+      funderAlerts.push({ funder: funder.address, signals });
+    }
+  }
+
+  return {
+    coordinatedBuyers: coordinatedBuyers > 0 ? coordinatedBuyers : undefined,
+    funderAlerts: funderAlerts.length > 0 ? funderAlerts : undefined,
+  };
+}
+
 function mapRowToGraph(
   row: {
     seedAddress: string;
@@ -132,7 +207,13 @@ function mapRowToGraph(
     temporal: edges.filter((e) => e.type === "temporal").length,
     shared_token: edges.filter((e) => e.type === "shared_token").length,
     token_launch: edges.filter((e) => e.type === "token_launch").length,
+    coordinated_buy: edges.filter((e) => e.type === "coordinated_buy").length,
+    rug_link: edges.filter((e) => e.type === "rug_link").length,
   };
+
+  const tokenMeta = isTokenCluster
+    ? deriveTokenClusterMeta(nodes, edges, mintAddress)
+    : {};
 
   return {
     seedAddress: creatorNode?.address ?? nodes[0]?.address ?? row.seedAddress,
@@ -140,12 +221,13 @@ function mapRowToGraph(
     edges,
     meta: {
       computedAt: row.calculatedAt.toISOString(),
-      heuristicVersion: "zen-v1",
+      heuristicVersion: CLUSTER_HEURISTIC_VERSION,
       context: isTokenCluster ? "token_creator" : "wallet",
       signalCounts,
       mintAddress,
       creatorAddress: creatorNode?.address,
       tokenSymbol: nodes.find((n) => n.role === "mint")?.label ?? null,
+      ...tokenMeta,
     },
   };
 }

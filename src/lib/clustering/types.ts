@@ -2,15 +2,23 @@ export type ClusterEdgeType =
   | "shared_funding"
   | "temporal"
   | "shared_token"
-  | "token_launch";
+  | "token_launch"
+  | "coordinated_buy"
+  | "rug_link";
 
 export type ClusterNodeRole =
   | "seed"
   | "creator"
   | "mint"
   | "funder"
+  | "sibling"
   | "recipient"
   | "peer";
+
+export interface FunderAlert {
+  funder: string;
+  signals: string[];
+}
 
 export type ClusterContext = "wallet" | "token_creator";
 
@@ -26,6 +34,7 @@ export interface ClusterNode {
   solBalance?: number;
   txCount?: number;
   sharedTokens?: string[];
+  flags?: string[];
 }
 
 export interface ClusterEdge {
@@ -50,6 +59,8 @@ export interface ClusterGraph {
     creatorAddress?: string;
     tokenSymbol?: string | null;
     tokenName?: string | null;
+    coordinatedBuyers?: number;
+    funderAlerts?: FunderAlert[];
   };
 }
 

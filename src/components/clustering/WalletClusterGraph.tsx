@@ -30,6 +30,8 @@ const EDGE_COLORS: Record<
   temporal: ZEN_BRAND.colors.mist,
   shared_token: ZEN_BRAND.colors.sand,
   token_launch: "#9945ff",
+  coordinated_buy: "#e8a87c",
+  rug_link: ZEN_BRAND.colors.high,
 };
 
 const RISK_MINIMAP: Record<WalletClusterNodeData["riskLevel"], string> = {
@@ -46,6 +48,7 @@ function nodeData(node: ClusterGraph["nodes"][number]): WalletClusterNodeData {
     riskLevel: node.riskLevel,
     riskScore: node.riskScore,
     sharedTokens: node.sharedTokens,
+    flags: node.flags,
   };
 }
 
@@ -105,7 +108,10 @@ function toFlowEdges(graph: ClusterGraph): Edge[] {
     source: edge.source,
     target: edge.target,
     label: edge.label,
-    animated: edge.type === "temporal" || edge.type === "token_launch",
+    animated:
+      edge.type === "temporal" ||
+      edge.type === "token_launch" ||
+      edge.type === "coordinated_buy",
     style: {
       stroke: EDGE_COLORS[edge.type],
       strokeWidth: 1 + edge.weight * 0.6,
@@ -198,6 +204,13 @@ export function WalletClusterGraph({
                 ? ` · Tokens: ${hovered.sharedTokens.join(", ")}`
                 : ""}
             </p>
+            {hovered.flags && hovered.flags.length > 0 && (
+              <ul className="mt-1.5 space-y-0.5 text-[10px] text-accent-red/90">
+                {hovered.flags.map((flag) => (
+                  <li key={flag}>· {flag}</li>
+                ))}
+              </ul>
+            )}
           </div>
         ) : (
           <p className="text-[10px] text-gray-500">
@@ -211,7 +224,14 @@ export function WalletClusterGraph({
         <LegendDot color={EDGE_COLORS.temporal} label="Temporal overlap" />
         <LegendDot color={EDGE_COLORS.shared_token} label="Shared tokens" />
         {graph.meta.context === "token_creator" && (
-          <LegendDot color={EDGE_COLORS.token_launch} label="Token launch" />
+          <>
+            <LegendDot color={EDGE_COLORS.token_launch} label="Token launch" />
+            <LegendDot
+              color={EDGE_COLORS.coordinated_buy}
+              label="Coordinated buy"
+            />
+            <LegendDot color={EDGE_COLORS.rug_link} label="Prior deploy link" />
+          </>
         )}
       </div>
     </div>
