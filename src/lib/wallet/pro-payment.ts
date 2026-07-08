@@ -18,9 +18,15 @@ import {
   PRO_PRICE_LAMPORTS,
   PRO_TREASURY_WALLET,
 } from "@/lib/pro/config";
-import { rememberWalletAdapterId } from "./payment-provider";
+import {
+  getStoredWalletAdapterId,
+  getStoredWalletName,
+  isMobileDevice,
+  mobilePaymentHint,
+  rememberWalletAdapter,
+} from "./payment-provider";
 
-const ADAPTER_STORAGE_KEY = "zenerating_wallet_adapter_id";
+const BLOCKED_UNLESS_STORED = ["metamask", "coinbase", "rabby", "brave"];
 
 interface LegacyProvider {
   publicKey?: PublicKey | { toBase58(): string } | null;
@@ -36,40 +42,43 @@ interface LegacyProvider {
   ): Promise<Transaction | { serialize(): Uint8Array }>;
 }
 
+const LEGACY_INJECTS: Array<{ id: string; getProvider: () => unknown }> = [
+  {
+    id: "legacy:jupiter",
+    getProvider: () =>
+      (typeof window !== "undefined"
+        ? window.jupiter?.solana ??
+          window.jupiterWallet?.solana ??
+          window.JupiterWallet?.solana
+        : null) as unknown,
+  },
+  {
+    id: "legacy:phantom",
+    getProvider: () =>
+      (typeof window !== "undefined"
+        ? window.phantom?.solana
+        : null) as unknown,
+  },
+  {
+    id: "legacy:solflare",
+    getProvider: () =>
+      (typeof window !== "undefined"
+        ? window.solflare?.solana
+        : null) as unknown,
+  },
+  {
+    id: "legacy:backpack",
+    getProvider: () =>
+      (typeof window !== "undefined"
+        ? window.backpack?.solana
+        : null) as unknown,
+  },
+];
+
 function pubkeyString(key: PublicKey | { toBase58(): string }): string {
   return typeof key === "object" && "toBase58" in key
     ? key.toBase58()
     : String(key);
-}
-
-function legacyInjects(): Array<{ id: string; getProvider: () => unknown }> {
-  if (typeof window === "undefined") return [];
-
-  return [
-    {
-      id: "legacy:phantom",
-      getProvider: () => window.phantom?.solana as unknown,
-    },
-    {
-      id: "legacy:jupiter",
-      getProvider: () =>
-        (window.jupiter?.solana ??
-          window.jupiterWallet?.solana ??
-          window.JupiterWallet?.solana) as unknown,
-    },
-    {
-      id: "legacy:solflare",
-      getProvider: () => window.solflare?.solana as unknown,
-    },
-    {
-      id: "legacy:backpack",
-      getProvider: () => window.backpack?.solana as unknown,
-    },
-    {
-      id: "legacy:solana",
-      getProvider: () => window.solana as unknown,
-    },
-  ];
 }
 
 function isLegacyProvider(provider: unknown): provider is LegacyProvider {
@@ -81,9 +90,65 @@ function isLegacyProvider(provider: unknown): provider is LegacyProvider {
   );
 }
 
-function normalizeSignature(signature: string | Uint8Array): string {
-  if (typeof signature === "string") return signature;
-  return bs58.encode(signature);
+function isBlockedWalletName(name: string, storedName: string | null): boolean {
+  const lower = name.toLowerCase();
+  if (storedName && lower === storedName.toLowerCase()) return false;
+  return BLOCKED_UNLESS_STORED.some((blocked) => lower.includes(blocked));
+}
+
+function hasSolanaPaymentFeature(wallet: Wallet): boolean {
+  return !!(
+    wallet.features[SolanaSignAndSendTransaction] ||
+    wallet.features[SolanaSignTransaction]
+  );
+}
+
+function walletNameMatchesStored(
+  walletName: string,
+  storedId: string | null,
+  storedName: string | null
+): boolean {
+  if (storedName && walletName.toLowerCase() === storedName.toLowerCase()) {
+    return true;
+  }
+  if (storedId?.startsWith("standard:")) {
+    const fromId = storedId.slice("standard:".length);
+    return walletName.toLowerCase() === fromId.toLowerCase();
+  }
+  if (storedId === "legacy:jupiter") {
+    return walletName.toLowerCase().includes("jupiter");
+  }
+  if (storedId === "legacy:phantom") {
+    return walletName.toLowerCase().includes("phantom");
+  }
+  if (storedId === "legacy:solflare") {
+    return walletName.toLowerCase().includes("solflare");
+  }
+  if (storedId === "legacy:backpack") {
+    return walletName.toLowerCase().includes("backpack");
+  }
+  return false;
+}
+
+function legacyInjectForStored(
+  storedId: string | null
+): Array<{ id: string; getProvider: () => unknown }> {
+  if (storedId?.startsWith("legacy:")) {
+    const match = LEGACY_INJECTS.find((inject) => inject.id === storedId);
+    if (match) return [match];
+  }
+
+  if (storedId?.startsWith("standard:")) {
+    const name = storedId.slice("standard:".length).toLowerCase();
+    if (name.includes("jupiter")) {
+      return LEGACY_INJECTS.filter((i) => i.id === "legacy:jupiter");
+    }
+    if (name.includes("phantom")) {
+      return LEGACY_INJECTS.filter((i) => i.id === "legacy:phantom");
+    }
+  }
+
+  return LEGACY_INJECTS;
 }
 
 function extractSignature(result: unknown): string | null {
@@ -158,28 +223,54 @@ function solanaAccount(account: WalletAccount): boolean {
   return account.chains.some((chain) => chain.startsWith("solana:"));
 }
 
-async function findStandardWalletAccount(
-  expectedWallet: string
-): Promise<{ wallet: Wallet; account: WalletAccount } | null> {
+function findExistingStandardAccount(
+  expectedWallet: string,
+  storedId: string | null,
+  storedName: string | null
+): { wallet: Wallet; account: WalletAccount } | null {
   for (const wallet of getWallets().get()) {
-    for (const account of wallet.accounts) {
-      if (account.address === expectedWallet && solanaAccount(account)) {
-        return { wallet, account };
-      }
+    if (!hasSolanaPaymentFeature(wallet)) continue;
+    if (isBlockedWalletName(wallet.name, storedName)) continue;
+    if (
+      storedId &&
+      !walletNameMatchesStored(wallet.name, storedId, storedName)
+    ) {
+      continue;
     }
+
+    const account = wallet.accounts.find(
+      (entry) => entry.address === expectedWallet && solanaAccount(entry)
+    );
+    if (account) return { wallet, account };
   }
   return null;
 }
 
-async function connectStandardWallet(
+async function connectPreferredStandardWallet(
   expectedWallet: string
 ): Promise<{ wallet: Wallet; account: WalletAccount } | null> {
-  for (const wallet of getWallets().get()) {
-    const hasPayment =
-      wallet.features[SolanaSignAndSendTransaction] ||
-      wallet.features[SolanaSignTransaction];
-    if (!hasPayment) continue;
+  const storedId = getStoredWalletAdapterId();
+  const storedName = getStoredWalletName();
 
+  const existing = findExistingStandardAccount(
+    expectedWallet,
+    storedId,
+    storedName
+  );
+  if (existing) return existing;
+
+  const candidates = getWallets()
+    .get()
+    .filter((wallet) => {
+      if (!hasSolanaPaymentFeature(wallet)) return false;
+      if (isBlockedWalletName(wallet.name, storedName)) return false;
+      if (!storedId && !storedName) return true;
+      return walletNameMatchesStored(wallet.name, storedId, storedName);
+    });
+
+  if (candidates.length === 0) return null;
+
+  for (const wallet of candidates) {
     const connectFeature = wallet.features[StandardConnect] as
       | StandardConnectFeature[typeof StandardConnect]
       | undefined;
@@ -191,27 +282,21 @@ async function connectStandardWallet(
         (entry) => entry.address === expectedWallet && solanaAccount(entry)
       );
       if (account) {
-        rememberWalletAdapterId(`standard:${wallet.name}`);
+        rememberWalletAdapter(`standard:${wallet.name}`, wallet.name);
         return { wallet, account };
       }
     } catch {
-      // try next wallet
+      // only try the wallet the user signed in with
     }
   }
 
   return null;
 }
 
-async function tryWalletStandardPayment(
-  expectedWallet: string,
+async function executeStandardPayment(
+  match: { wallet: Wallet; account: WalletAccount },
   transaction: Transaction
 ): Promise<string | null> {
-  let match =
-    (await findStandardWalletAccount(expectedWallet)) ??
-    (await connectStandardWallet(expectedWallet));
-
-  if (!match) return null;
-
   const { wallet, account } = match;
   const serialized = transaction.serialize({
     requireAllSignatures: false,
@@ -262,21 +347,23 @@ async function ensureLegacyConnected(
   if (!provider.connect) return false;
 
   try {
-    const result = await provider.connect();
+    const result = await provider.connect({ onlyIfTrusted: true });
     if (pubkeyString(result.publicKey) === expectedWallet) {
-      rememberWalletAdapterId(adapterId);
+      rememberWalletAdapter(adapterId);
       return true;
     }
   } catch {
-    try {
-      const result = await provider.connect({ onlyIfTrusted: true });
-      if (pubkeyString(result.publicKey) === expectedWallet) {
-        rememberWalletAdapterId(adapterId);
-        return true;
-      }
-    } catch {
-      return false;
+    // fall through to full connect
+  }
+
+  try {
+    const result = await provider.connect();
+    if (pubkeyString(result.publicKey) === expectedWallet) {
+      rememberWalletAdapter(adapterId);
+      return true;
     }
+  } catch {
+    return false;
   }
 
   return false;
@@ -286,21 +373,10 @@ async function tryLegacyPayment(
   expectedWallet: string,
   transaction: Transaction
 ): Promise<string | null> {
-  const storedId =
-    typeof window !== "undefined"
-      ? sessionStorage.getItem(ADAPTER_STORAGE_KEY)
-      : null;
+  const storedId = getStoredWalletAdapterId();
+  const injects = legacyInjectForStored(storedId);
 
-  const ordered = legacyInjects();
-  if (storedId) {
-    ordered.sort((a, b) => {
-      if (a.id === storedId) return -1;
-      if (b.id === storedId) return 1;
-      return 0;
-    });
-  }
-
-  for (const inject of ordered) {
+  for (const inject of injects) {
     const provider = inject.getProvider();
     if (!isLegacyProvider(provider)) continue;
 
@@ -317,7 +393,7 @@ async function tryLegacyPayment(
         const signature = extractSignature(result);
         if (signature) return signature;
       } catch {
-        // fall through to signTransaction
+        // try signTransaction
       }
     }
 
@@ -330,7 +406,7 @@ async function tryLegacyPayment(
             : signed.serialize();
         return broadcastSignedTransaction(bytes);
       } catch {
-        // try next provider
+        // try next inject
       }
     }
   }
@@ -338,12 +414,41 @@ async function tryLegacyPayment(
   return null;
 }
 
+export function getPaymentEnvironmentError(): string | null {
+  const storedName = getStoredWalletName();
+  return mobilePaymentHint(storedName);
+}
+
 export async function preparePaymentWallet(
   expectedWallet: string
 ): Promise<void> {
-  if (await findStandardWalletAccount(expectedWallet)) return;
+  const mobileHint = getPaymentEnvironmentError();
+  if (mobileHint && isMobileDevice()) {
+    const hasStandard = findExistingStandardAccount(
+      expectedWallet,
+      getStoredWalletAdapterId(),
+      getStoredWalletName()
+    );
+    const hasLegacy = legacyInjectForStored(getStoredWalletAdapterId()).some(
+      (inject) => {
+        const provider = inject.getProvider();
+        return (
+          isLegacyProvider(provider) &&
+          provider.publicKey &&
+          pubkeyString(provider.publicKey) === expectedWallet
+        );
+      }
+    );
 
-  for (const inject of legacyInjects()) {
+    if (!hasStandard && !hasLegacy) {
+      throw new Error(mobileHint);
+    }
+  }
+
+  const standard = await connectPreferredStandardWallet(expectedWallet);
+  if (standard) return;
+
+  for (const inject of legacyInjectForStored(getStoredWalletAdapterId())) {
     const provider = inject.getProvider();
     if (!isLegacyProvider(provider)) continue;
     if (await ensureLegacyConnected(provider, expectedWallet, inject.id)) {
@@ -351,10 +456,9 @@ export async function preparePaymentWallet(
     }
   }
 
-  if (await connectStandardWallet(expectedWallet)) return;
-
+  const walletLabel = getStoredWalletName() ?? "your Solana wallet";
   throw new Error(
-    "Open your wallet extension and approve the connection for this site, then try Pay again."
+    `Could not reach ${walletLabel}. Open the ${walletLabel} extension, make sure the same account is selected, then tap Pay again.`
   );
 }
 
@@ -365,13 +469,26 @@ export async function sendProSubscriptionPayment(
 
   const transaction = await buildProPaymentTransaction(sessionWallet);
 
-  const standardSig = await tryWalletStandardPayment(sessionWallet, transaction);
-  if (standardSig) return standardSig;
+  const storedId = getStoredWalletAdapterId();
+  const storedName = getStoredWalletName();
+
+  const standardMatch =
+    findExistingStandardAccount(sessionWallet, storedId, storedName) ??
+    (await connectPreferredStandardWallet(sessionWallet));
+
+  if (standardMatch) {
+    const standardSig = await executeStandardPayment(
+      standardMatch,
+      transaction
+    );
+    if (standardSig) return standardSig;
+  }
 
   const legacySig = await tryLegacyPayment(sessionWallet, transaction);
   if (legacySig) return legacySig;
 
+  const walletLabel = storedName ?? "wallet";
   throw new Error(
-    "Could not open a payment prompt in your wallet. Try Phantom or Jupiter, approve the connection, then press Pay again."
+    `Payment was not approved in ${walletLabel}. Open ${walletLabel}, approve the 0.1 SOL transfer, and try again.`
   );
 }

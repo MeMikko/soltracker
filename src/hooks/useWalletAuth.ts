@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import {
   clearWalletAdapterId,
-  rememberWalletAdapterId,
+  rememberWalletAdapter,
 } from "@/lib/wallet/payment-provider";
 import {
   discoverWallets,
@@ -72,7 +72,7 @@ async function authenticateWallet(adapter: WalletAdapter): Promise<void> {
   }
 
   setActiveWallet(adapter);
-  rememberWalletAdapterId(adapter.id);
+  rememberWalletAdapter(adapter.id, adapter.name);
 }
 
 export function useWalletAuth(): WalletAuthState {

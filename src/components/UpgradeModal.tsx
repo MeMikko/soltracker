@@ -10,7 +10,11 @@ import {
   PRO_PRICE_SOL,
   PRO_TREASURY_WALLET,
 } from "@/lib/pro/config";
-import { sendProSubscriptionPayment } from "@/lib/wallet/send-sol";
+import { getStoredWalletName } from "@/lib/wallet/payment-provider";
+import {
+  getPaymentEnvironmentError,
+  sendProSubscriptionPayment,
+} from "@/lib/wallet/pro-payment";
 import { WalletPickerModal } from "./WalletPickerModal";
 
 interface UpgradeModalProps {
@@ -50,6 +54,8 @@ export function UpgradeModal({ open, onClose }: UpgradeModalProps) {
   const isPro = usage?.tier === "pro" || usage?.tier === "admin";
   const isFreeAtLimit =
     usage?.tier === "free" && isSignedIn && usage.remaining === 0;
+  const signedInWalletName = getStoredWalletName();
+  const mobileHint = getPaymentEnvironmentError();
 
   useEffect(() => {
     if (!open) return;
@@ -151,9 +157,20 @@ export function UpgradeModal({ open, onClose }: UpgradeModalProps) {
                   {truncateAddress(PRO_TREASURY_WALLET, 6)}
                 </span>
               </p>
-              <p className="mt-1 text-zen-mist">
-                Press Pay — your wallet extension will ask to approve the transfer.
-              </p>
+              {signedInWalletName && (
+                <p className="mt-1 text-zen-mist">
+                  Pay with <span className="text-white">{signedInWalletName}</span>{" "}
+                  — the same wallet you signed in with.
+                </p>
+              )}
+              {mobileHint ? (
+                <p className="mt-1 text-accent-red/90">{mobileHint}</p>
+              ) : (
+                <p className="mt-1 text-zen-mist">
+                  Press Pay — {signedInWalletName ?? "your wallet"} will ask to
+                  approve the 0.1 SOL transfer.
+                </p>
+              )}
               {isFreeAtLimit && (
                 <p className="mt-1 text-accent-red/90">
                   Daily free searches used — Pro unlocks unlimited access.
