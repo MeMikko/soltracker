@@ -55,6 +55,25 @@ model SearchLog {
   @@index([identifier, date])
 }
 
+/// Active Pro subscription — unlimited searches while `activeUntil` is in the future.
+model ProSubscription {
+  wallet      String   @id
+  activeUntil DateTime
+  updatedAt   DateTime @updatedAt
+}
+
+/// On-chain Pro payments — one row per verified transaction signature.
+model ProPayment {
+  id        String   @id @default(cuid())
+  wallet    String
+  signature String   @unique
+  lamports  BigInt
+  paidAt    DateTime @default(now())
+  periodEnd DateTime
+
+  @@index([wallet])
+}
+
 /// Tracks distinct wallets authenticated per IP per day (anti multi-wallet abuse).
 model IpWalletLink {
   id        String   @id @default(cuid())

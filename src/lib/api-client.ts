@@ -29,6 +29,30 @@ export async function fetchUsage(): Promise<UsageResponse> {
   return parseJson<UsageResponse>(res);
 }
 
+export interface ProActivationResult {
+  pro: { active: boolean; expiresAt: string | null };
+  usage: UsageResponse;
+}
+
+export async function activateProPayment(
+  signature: string
+): Promise<ApiSuccess<ProActivationResult> | ApiFailure> {
+  const res = await fetch("/api/pro/activate", {
+    method: "POST",
+    credentials: "include",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ signature }),
+  });
+
+  const body = await parseJson<ProActivationResult & ApiError>(res);
+
+  if (!res.ok) {
+    return { ok: false, error: body, status: res.status };
+  }
+
+  return { ok: true, data: body, usage: body.usage };
+}
+
 export async function searchAddress(
   address: string
 ): Promise<ApiSuccess<SearchResponse> | ApiFailure> {

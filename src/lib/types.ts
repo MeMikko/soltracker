@@ -71,6 +71,7 @@ export interface UsageResponse {
   tier: "free" | "pro" | "admin";
   wallet: string | null;
   authenticated: boolean;
+  proExpiresAt?: string | null;
 }
 
 export interface AuthSession {
@@ -90,5 +91,7 @@ export interface ApiError {
     | "WALLET_REQUIRED"
     | "IP_WALLET_LIMIT"
     | "AUTH_EXPIRED"
-    | "AUTH_INVALID";
+    | "AUTH_INVALID"
+    | "PAYMENT_INVALID"
+    | "PAYMENT_USED";
 }

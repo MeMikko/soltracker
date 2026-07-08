@@ -9,6 +9,7 @@ const searchCounts = new Map<string, number>();
 const billedSearches = new Map<string, number>();
 const ipWalletLinks = new Map<string, Set<string>>();
 const cacheEntries = new Map<string, MemoryCacheEntry>();
+const proExpiryByWallet = new Map<string, number>();
 
 function ipWalletKey(ip: string, date: string): string {
   return `${ip}:${date}`;
@@ -84,6 +85,14 @@ export function memoryCacheGet<T>(key: string): CacheEnvelope<T> | null {
     data: entry.value as T,
     cachedAt: new Date(entry.expiresAt).toISOString(),
   };
+}
+
+export function memoryGetProExpiry(wallet: string): number | null {
+  return proExpiryByWallet.get(wallet) ?? null;
+}
+
+export function memorySetProExpiry(wallet: string, expiresAtMs: number): void {
+  proExpiryByWallet.set(wallet, expiresAtMs);
 }
 
 export function memoryCacheSet<T>(

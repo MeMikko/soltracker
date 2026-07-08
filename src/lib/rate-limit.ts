@@ -13,11 +13,14 @@ import {
 } from "@/lib/dev/memory-store";
 import { prisma } from "@/lib/db";
 import { withDbFallback } from "@/lib/db-safe";
+import { isProActive, getProStatus } from "@/lib/pro/subscription-service";
 import type { UsageResponse } from "@/lib/types";
 
 export const FREE_DAILY_LIMIT = 5;
-/** Display value for admin wallets — searches are not decremented. */
-export const ADMIN_DISPLAY_LIMIT = 9999;
+/** Display value for unlimited tiers — searches are not decremented. */
+export const UNLIMITED_DISPLAY_LIMIT = 9999;
+/** @deprecated Use UNLIMITED_DISPLAY_LIMIT */
+export const ADMIN_DISPLAY_LIMIT = UNLIMITED_DISPLAY_LIMIT;
 const SECONDS_PER_DAY = 86_400;
 const BILLED_SEARCH_TTL_SECONDS = 12 * 60;
 
@@ -65,20 +68,33 @@ export function getRequestIdentifier(request: Request): string {
   throw new WalletAuthRequiredError();
 }
 
-function buildAdminUsage(wallet: string): UsageResponse {
+function buildUnlimitedUsage(
+  wallet: string,
+  tier: "pro" | "admin",
+  proExpiresAt?: string | null
+): UsageResponse {
   return {
     used: 0,
-    limit: ADMIN_DISPLAY_LIMIT,
-    remaining: ADMIN_DISPLAY_LIMIT,
-    tier: "admin",
+    limit: UNLIMITED_DISPLAY_LIMIT,
+    remaining: UNLIMITED_DISPLAY_LIMIT,
+    tier,
     wallet,
     authenticated: true,
+    proExpiresAt: proExpiresAt ?? null,
   };
 }
 
-function buildUsage(used: number, wallet: string | null): UsageResponse {
+async function buildUsage(
+  used: number,
+  wallet: string | null
+): Promise<UsageResponse> {
   if (wallet && isAdminWallet(wallet)) {
-    return buildAdminUsage(wallet);
+    return buildUnlimitedUsage(wallet, "admin");
+  }
+
+  if (wallet && (await isProActive(wallet))) {
+    const pro = await getProStatus(wallet);
+    return buildUnlimitedUsage(wallet, "pro", pro.expiresAt);
   }
 
   return {
@@ -88,6 +104,7 @@ function buildUsage(used: number, wallet: string | null): UsageResponse {
     tier: "free",
     wallet,
     authenticated: wallet !== null || isWalletAuthDisabled(),
+    proExpiresAt: null,
   };
 }
 
@@ -200,6 +217,11 @@ export async function consumeSearchForAddress(
   request: Request,
   address: string
 ): Promise<UsageResponse> {
+  const wallet = getWalletFromRequest(request);
+  if (wallet && (isAdminWallet(wallet) || (await isProActive(wallet)))) {
+    return getSearchUsage(request);
+  }
+
   const identifier = getRequestIdentifier(request);
   const date = todayKey();
   const shouldBill = await tryClaimBilledSearch(identifier, address, date);
@@ -215,8 +237,8 @@ export async function consumeSearch(
   request: Request
 ): Promise<UsageResponse> {
   const wallet = getWalletFromRequest(request);
-  if (wallet && isAdminWallet(wallet)) {
-    return buildAdminUsage(wallet);
+  if (wallet && (isAdminWallet(wallet) || (await isProActive(wallet)))) {
+    return getSearchUsage(request);
   }
 
   const identifier = getRequestIdentifier(request);
@@ -231,7 +253,9 @@ export async function consumeSearch(
 }
 
 export function canSearch(usage: UsageResponse): boolean {
-  if (usage.tier === "admin") return usage.authenticated;
+  if (usage.tier === "admin" || usage.tier === "pro") {
+    return usage.authenticated;
+  }
   return usage.authenticated && usage.remaining > 0;
 }
 

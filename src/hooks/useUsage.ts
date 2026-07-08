@@ -20,10 +20,13 @@ export function useUsage() {
   useEffect(() => {
     refresh();
 
-    const onSessionChange = () => refresh();
-    window.addEventListener("wallet-session-changed", onSessionChange);
-    return () =>
-      window.removeEventListener("wallet-session-changed", onSessionChange);
+    const onRefresh = () => refresh();
+    window.addEventListener("wallet-session-changed", onRefresh);
+    window.addEventListener("usage-changed", onRefresh);
+    return () => {
+      window.removeEventListener("wallet-session-changed", onRefresh);
+      window.removeEventListener("usage-changed", onRefresh);
+    };
   }, [refresh]);
 
   return { usage, setUsage, refresh };
