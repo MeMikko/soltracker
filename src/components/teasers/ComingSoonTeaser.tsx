@@ -63,14 +63,6 @@ const TOKEN_COMING_SOON: ComingSoonTeaserItem[] = [
     accent: "from-solana-purple/25 to-solana-green/10",
   },
   {
-    phase: 4,
-    title: "Funding Network",
-    description:
-      "Trace wallets that funded this mint and map clusters that move together on-chain.",
-    icon: "cluster",
-    accent: "from-solana-purple/40 to-solana-purple/5",
-  },
-  {
     phase: 7,
     title: "Real-Time Alerts",
     description:

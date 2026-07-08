@@ -15,8 +15,9 @@ const jetbrainsMono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Solana Intelligence",
-  description: "Wallet and token risk analysis on Solana",
+  title: "Zenerating — Mindful Solana Intelligence",
+  description:
+    "Calm, clear-headed due diligence for Solana wallets and tokens. Risk scores, clustering, and on-chain intelligence.",
 };
 
 export default function RootLayout({

@@ -91,3 +91,18 @@ body {
 ::-webkit-scrollbar-thumb:hover {
   background: #2a2a3e;
 }
+
+.zen-flow .react-flow__controls button {
+  background: #141a17;
+  border-color: #1f2a24;
+  color: #a8b5c4;
+  fill: #a8b5c4;
+}
+
+.zen-flow .react-flow__controls button:hover {
+  background: #1a221d;
+}
+
+.zen-flow .react-flow__edge-textbg {
+  fill: #141a17;
+}

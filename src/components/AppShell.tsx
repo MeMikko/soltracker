@@ -1,5 +1,6 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
+import { ZENERATING } from "@/lib/brand/zenerating";
 import { UsageCounter } from "./UsageCounter";
 import { WalletButton } from "./WalletButton";
 import type { UsageResponse } from "@/lib/types";
@@ -23,11 +24,16 @@ export function AppShell({
         <div className="mx-auto flex w-full max-w-6xl flex-col gap-3 px-4 py-3 sm:flex-row sm:items-center sm:justify-between sm:px-6 sm:py-4">
           <div className="flex min-w-0 items-center gap-3">
             <Link href="/" className="group flex shrink-0 items-center gap-2.5">
-              <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-solana text-xs font-bold text-surface shadow-glow-sm">
-                SI
+              <span className="flex h-8 w-8 items-center justify-center rounded-lg border border-zen-sage/30 bg-zen-card text-xs font-bold text-zen-sage shadow-zen">
+                Z
               </span>
-              <span className="text-sm font-semibold tracking-tight text-white group-hover:text-gray-200">
-                Solana Intelligence
+              <span className="flex flex-col leading-tight">
+                <span className="text-sm font-semibold tracking-tight text-white group-hover:text-gray-200">
+                  {ZENERATING.name}
+                </span>
+                <span className="hidden text-[10px] text-gray-600 xs:inline">
+                  {ZENERATING.tagline}
+                </span>
               </span>
             </Link>
             {addressBar && (

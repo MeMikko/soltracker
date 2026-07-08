@@ -4,6 +4,7 @@ const config: Config = {
   content: [
     "./src/pages/**/*.{js,ts,jsx,tsx,mdx}",
     "./src/components/**/*.{js,ts,jsx,tsx,mdx}",
+    "./node_modules/@xyflow/react/**/*.{js,ts,jsx,tsx}",
     "./src/app/**/*.{js,ts,jsx,tsx,mdx}",
   ],
   theme: {
@@ -30,6 +31,14 @@ const config: Config = {
           blue: "#38bdf8",
           violet: "#a78bfa",
         },
+        zen: {
+          sage: "#7d9b8a",
+          mist: "#a8b5c4",
+          sand: "#c4b5a0",
+          deep: "#0a0f0d",
+          card: "#141a17",
+          border: "#1f2a24",
+        },
       },
       fontFamily: {
         sans: ["var(--font-sans)", "system-ui", "sans-serif"],
@@ -40,6 +49,8 @@ const config: Config = {
         "glow-sm": "0 0 12px rgba(56, 189, 248, 0.15)",
         card: "0 4px 32px rgba(0, 0, 0, 0.45)",
         "inner-glow": "inset 0 1px 0 rgba(255, 255, 255, 0.05)",
+        zen: "0 4px 24px rgba(125, 155, 138, 0.08)",
+        "zen-lg": "0 8px 32px rgba(125, 155, 138, 0.14)",
       },
       backgroundImage: {
         "gradient-radial": "radial-gradient(var(--tw-gradient-stops))",

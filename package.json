@@ -19,6 +19,7 @@
     "@upstash/redis": "^1.34.3",
     "@wallet-standard/app": "^1.1.1",
     "@wallet-standard/features": "^1.1.1",
+    "@xyflow/react": "^12.11.2",
     "bs58": "^6.0.0",
     "next": "^15.1.0",
     "react": "^19.0.0",

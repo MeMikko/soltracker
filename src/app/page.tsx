@@ -11,6 +11,7 @@ import { ComingSoonSection } from "@/components/ComingSoonSection";
 import { WalletGate } from "@/components/WalletGate";
 import { useUsage } from "@/hooks/useUsage";
 import { searchAddress } from "@/lib/api-client";
+import { ZENERATING } from "@/lib/brand/zenerating";
 import type { ApiError } from "@/lib/types";
 
 const FEATURES = [
@@ -89,12 +90,11 @@ export default function HomePage() {
             </div>
 
             <h1 className="max-w-2xl text-center text-3xl font-bold tracking-tight text-white sm:text-4xl lg:text-5xl">
-              On-chain risk intelligence for{" "}
-              <span className="gradient-text">wallets & tokens</span>
+              {ZENERATING.tagline}
             </h1>
             <p className="mt-4 max-w-lg text-center text-sm leading-relaxed text-gray-500 sm:text-base">
-              Paste a wallet or token mint address for an instant risk score,
-              authority checks, liquidity data, and holder metrics.
+              {ZENERATING.subtagline} Paste a wallet or token mint for risk
+              scores, wallet clustering, and calm on-chain clarity.
             </p>
 
             <div className="mt-6 w-full max-w-2xl">

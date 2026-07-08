@@ -11,6 +11,7 @@ import { SearchBar } from "@/components/SearchBar";
 import { TokenDetails } from "@/components/TokenDetails";
 import { TokenHeader } from "@/components/TokenHeader";
 import { UpgradeModal } from "@/components/UpgradeModal";
+import { WalletClusterSection } from "@/components/clustering/WalletClusterSection";
 import { WalletDetails } from "@/components/WalletDetails";
 import { WalletGate } from "@/components/WalletGate";
 import { useUsage } from "@/hooks/useUsage";
@@ -209,6 +210,12 @@ export function ResultsContent() {
               <div className="crypto-card p-4 sm:p-6">
                 {wallet && <WalletDetails data={wallet} />}
                 {token && <TokenDetails data={token} />}
+              </div>
+            )}
+
+            {wallet && (
+              <div className="crypto-card p-4 sm:p-6">
+                <WalletClusterSection address={address} />
               </div>
             )}
           </div>

@@ -76,3 +76,37 @@ model CacheEntry {
 
   @@index([expiresAt])
 }
+
+/// Wallet clustering graph — nodes stored as JSON, edges normalized for queries.
+model WalletCluster {
+  id           String   @id @default(cuid())
+  seedAddress  String   @unique
+  nodes        Json
+  nodeCount    Int
+  edgeCount    Int
+  calculatedAt DateTime @default(now())
+  expiresAt    DateTime
+
+  edges ClusterEdge[]
+
+  @@index([seedAddress])
+  @@index([expiresAt])
+}
+
+/// Directed connection between two wallets in a cluster graph.
+model ClusterEdge {
+  id        String        @id @default(cuid())
+  clusterId String
+  cluster   WalletCluster @relation(fields: [clusterId], references: [id], onDelete: Cascade)
+  source    String
+  target    String
+  edgeType  String
+  weight    Float         @default(1)
+  label     String?
+  metadata  Json?
+
+  @@unique([clusterId, source, target, edgeType])
+  @@index([clusterId])
+  @@index([source])
+  @@index([target])
+}

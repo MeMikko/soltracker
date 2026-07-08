@@ -1,3 +1,4 @@
+import type { ClusterGraph } from "@/lib/clustering/types";
 import type {
   ApiError,
   RiskResponse,
@@ -94,6 +95,25 @@ export async function fetchToken(
   const body = await parseJson<TokenDetails & { usage?: UsageResponse } & ApiError>(
     res
   );
+
+  if (!res.ok) {
+    return { ok: false, error: body, status: res.status };
+  }
+
+  const { data, usage } = extractUsage(body);
+  return { ok: true, data, usage };
+}
+
+export async function fetchCluster(
+  address: string
+): Promise<ApiSuccess<ClusterGraph> | ApiFailure> {
+  const res = await fetch(
+    `/api/clustering/${encodeURIComponent(address)}`,
+    fetchOptions
+  );
+  const body = await parseJson<
+    ClusterGraph & { usage?: UsageResponse; source?: string } & ApiError
+  >(res);
 
   if (!res.ok) {
     return { ok: false, error: body, status: res.status };

@@ -42,8 +42,8 @@ const ROADMAP: RoadmapItem[] = [
     title: "Wallet Clustering",
     description:
       "Trace fund flows and map wallet networks. See which addresses move together and fund new mints.",
-    status: "soon",
-    accent: "from-solana-purple/40 to-solana-purple/5",
+    status: "live",
+    accent: "from-zen-sage/30 to-zen-deep",
     icon: "cluster",
   },
   {
@@ -103,6 +103,7 @@ const ROADMAP: RoadmapItem[] = [
 ];
 
 const LIVE_COUNT = ROADMAP.filter((item) => item.status === "live").length;
+const LIVE_PHASE_LABEL = `Phases 1–${LIVE_COUNT}`;
 
 function StatusBadge({ status }: { status: RoadmapItem["status"] }) {
   if (status === "live") {
@@ -131,8 +132,8 @@ export function ComingSoonSection() {
           Product Roadmap
         </h2>
         <p className="mx-auto mt-2 max-w-lg text-xs leading-relaxed text-gray-600 sm:text-sm">
-          Phases 1–3 are live today. Phases 4–10 are in active development —
-          clustering, alerts, extension, and AI intelligence on the way.
+          {LIVE_PHASE_LABEL} are live today. Phases 5–10 are in active development —
+          holder analytics, alerts, extension, and AI intelligence on the way.
         </p>
 
         <div className="mx-auto mt-5 max-w-sm">
@@ -149,7 +150,7 @@ export function ComingSoonSection() {
             />
           </div>
           <p className="mt-2 text-[10px] text-gray-600">
-            You are here → building Phase 4
+            You are here → building Phase 5
           </p>
         </div>
       </div>
