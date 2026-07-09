@@ -21,7 +21,7 @@ import { ZENERATING } from "@/lib/brand/zenerating";
 import type { ApiError } from "@/lib/types";
 
 const FEATURE_CARD_CLASS =
-  "flex h-full flex-col items-center gap-2 rounded-xl border border-zen-border/70 bg-zen-card/60 px-3 py-4 text-center transition-all hover:border-zen-cyan/30 hover:bg-zen-card hover:shadow-[0_4px_20px_rgba(34,211,238,0.08)]";
+  "flex h-full items-start gap-3 rounded-xl border border-zen-border/50 bg-zen-deep/50 px-4 py-3.5 text-left transition-colors hover:border-zen-border/80 hover:bg-zen-card/40";
 
 const FEATURES = [
   {
@@ -130,71 +130,78 @@ export default function HomePage() {
               {ZENERATING.subtagline}
             </p>
 
-            <div className="mt-8 flex w-full max-w-6xl flex-col gap-4">
-              <div className="crypto-card w-full p-4 sm:p-5">
-                <WalletGate authenticated={isAuthenticated} />
-                <div className={isAuthenticated ? "mt-4" : ""}>
-                  <SearchBar
-                    onSearch={handleSearch}
-                    disabled={
-                      !isAuthenticated ||
-                      (usage?.tier === "free" &&
-                        usage.remaining === 0 &&
-                        (usage.bonusSearches ?? 0) === 0)
-                    }
-                    autoFocus={isAuthenticated}
-                    compact
-                  />
-                </div>
-              </div>
-
-              <FeaturedToken />
-              <RecentTokensList />
-
-              {usage?.tier === "free" &&
-                usage.remaining === 0 &&
-                isAuthenticated && (
-                <p className="text-center text-sm text-accent-red">
-                Daily free limit reached.{" "}
-                <button
-                  type="button"
-                  onClick={() => openPurchase("search_pack")}
-                  className="font-medium text-zen-cyan hover:underline"
-                >
-                  Buy extra searches
-                </button>
-                {" · "}
-                <button
-                  type="button"
-                  onClick={() => openPurchase("pro")}
-                  className="font-medium text-zen-cyan hover:underline"
-                >
-                  Go Pro
-                </button>
-                </p>
-              )}
-
-              <div className="grid w-full grid-cols-1 gap-3 xs:grid-cols-2 sm:grid-cols-3">
-                {FEATURES.map((feature) => (
-                  <div key={feature.label} className={FEATURE_CARD_CLASS}>
-                    <div
-                      className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-xl border border-zen-border/80 text-xs font-bold ${feature.iconClass}`}
-                    >
-                      {feature.abbr}
-                    </div>
-                    <div className="min-w-0 w-full">
-                      <p className="truncate text-sm font-medium text-white">
-                        {feature.label}
-                      </p>
-                      <p className="mt-0.5 text-[10px] leading-relaxed text-gray-600">
-                        {feature.desc}
-                      </p>
-                    </div>
+            <div className="mt-8 flex w-full max-w-6xl flex-col">
+              <div className="flex flex-col gap-4">
+                <div className="crypto-card w-full p-4 sm:p-5">
+                  <WalletGate authenticated={isAuthenticated} />
+                  <div className={isAuthenticated ? "mt-4" : ""}>
+                    <SearchBar
+                      onSearch={handleSearch}
+                      disabled={
+                        !isAuthenticated ||
+                        (usage?.tier === "free" &&
+                          usage.remaining === 0 &&
+                          (usage.bonusSearches ?? 0) === 0)
+                      }
+                      autoFocus={isAuthenticated}
+                      compact
+                    />
                   </div>
-                ))}
+                </div>
+
+                <FeaturedToken />
+                <RecentTokensList />
+
+                {usage?.tier === "free" &&
+                  usage.remaining === 0 &&
+                  isAuthenticated && (
+                  <p className="text-center text-sm text-accent-red">
+                    Daily free limit reached.{" "}
+                    <button
+                      type="button"
+                      onClick={() => openPurchase("search_pack")}
+                      className="font-medium text-zen-cyan hover:underline"
+                    >
+                      Buy extra searches
+                    </button>
+                    {" · "}
+                    <button
+                      type="button"
+                      onClick={() => openPurchase("pro")}
+                      className="font-medium text-zen-cyan hover:underline"
+                    >
+                      Go Pro
+                    </button>
+                  </p>
+                )}
               </div>
 
-              <ComingSoonSection />
+              <section className="mt-10 border-t border-zen-border/50 pt-8">
+                <h2 className="mb-4 text-xs font-semibold uppercase tracking-[0.2em] text-zen-sage">
+                  What&apos;s included
+                </h2>
+                <div className="grid w-full grid-cols-1 gap-3 xs:grid-cols-2 sm:grid-cols-3">
+                  {FEATURES.map((feature) => (
+                    <div key={feature.label} className={FEATURE_CARD_CLASS}>
+                      <div
+                        className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-zen-border/80 text-[10px] font-bold ${feature.iconClass}`}
+                      >
+                        {feature.abbr}
+                      </div>
+                      <div className="min-w-0 flex-1 pt-0.5">
+                        <p className="truncate text-sm font-medium text-white">
+                          {feature.label}
+                        </p>
+                        <p className="mt-0.5 text-[10px] leading-relaxed text-gray-600">
+                          {feature.desc}
+                        </p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </section>
+
+              <ComingSoonSection className="mt-10 border-t border-zen-border/50 pt-8" />
             </div>
           </div>
         )}

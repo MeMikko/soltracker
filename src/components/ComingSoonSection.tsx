@@ -225,7 +225,7 @@ interface ComingSoonSectionProps {
 export function ComingSoonSection({ className }: ComingSoonSectionProps = {}) {
   return (
     <section className={`w-full max-w-6xl ${className ?? ""}`}>
-      <div className="mb-12 text-center">
+      <div className="mb-10 text-center sm:mb-12">
         <span className="section-label">Product roadmap</span>
         <h2 className="mt-2 text-2xl font-bold tracking-tight sm:text-3xl">
           <span className="gradient-text">Building with intention</span>
