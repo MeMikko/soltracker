@@ -55,6 +55,9 @@ export function mockTokenChainData(mint: string): TokenChainData {
       poolAddress: hasLp ? `Pool${mint.slice(-8)}` : null,
       liquidityUsd: hasLp ? 5000 + (seed % 50_000) : null,
       dex: hasLp ? "Raydium" : null,
+      priceUsd: hasLp ? 0.0001 + (seed % 1000) / 1_000_000 : null,
+      marketCapUsd: hasLp ? 10_000 + (seed % 500_000) : null,
+      priceChange24h: hasLp ? -50 + (seed % 200) : null,
     },
   };
 }

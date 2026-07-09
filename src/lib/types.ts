@@ -41,6 +41,9 @@ export interface TokenLpInfo {
   poolAddress: string | null;
   liquidityUsd: number | null;
   dex: string | null;
+  priceUsd: number | null;
+  marketCapUsd: number | null;
+  priceChange24h: number | null;
 }
 
 export interface TokenDetails {

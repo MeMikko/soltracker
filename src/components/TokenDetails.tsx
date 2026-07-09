@@ -1,5 +1,10 @@
 import type { TokenDetails as TokenDetailsType } from "@/lib/types";
-import { formatNumber, formatSupply, truncateAddress } from "@/lib/format";
+import {
+  formatNumber,
+  formatSupply,
+  formatUsdCompact,
+  truncateAddress,
+} from "@/lib/format";
 import { DetailCard } from "./DetailCard";
 
 interface TokenDetailsProps {
@@ -25,6 +30,12 @@ export function TokenDetails({ data }: TokenDetailsProps) {
             label="Holder Count"
             value={formatNumber(data.holderCount, 0)}
           />
+          {data.lp.marketCapUsd !== null && (
+            <DetailCard
+              label="Market Cap"
+              value={formatUsdCompact(data.lp.marketCapUsd)}
+            />
+          )}
           <DetailCard
             label="Mint Authority"
             value={data.mintAuthorityRevoked ? "Revoked" : "Active"}

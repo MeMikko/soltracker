@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { TokenMarketStrip } from "@/components/TokenMarketStrip";
 import { getGmgnTradeUrl } from "@/lib/gmgn";
 import { truncateAddress } from "@/lib/format";
 import type { TokenDetails } from "@/lib/types";
@@ -49,6 +50,7 @@ export function TokenHeader({ data }: TokenHeaderProps) {
               {truncateAddress(data.mint, 8)}
             </span>
           </div>
+          <TokenMarketStrip lp={data.lp} />
         </div>
       </div>
 

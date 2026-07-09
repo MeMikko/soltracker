@@ -6,6 +6,10 @@ interface DexScreenerPair {
   chainId?: string;
   dexId?: string;
   pairAddress?: string;
+  priceUsd?: string | number;
+  marketCap?: number;
+  fdv?: number;
+  priceChange?: { h24?: number };
   liquidity?: { usd?: number };
 }
 
@@ -18,7 +22,29 @@ const EMPTY_LP: TokenLpInfo = {
   poolAddress: null,
   liquidityUsd: null,
   dex: null,
+  priceUsd: null,
+  marketCapUsd: null,
+  priceChange24h: null,
 };
+
+function parsePriceUsd(value: string | number | undefined): number | null {
+  if (typeof value === "number" && Number.isFinite(value)) {
+    return value;
+  }
+  if (typeof value === "string") {
+    const parsed = Number(value);
+    return Number.isFinite(parsed) ? parsed : null;
+  }
+  return null;
+}
+
+function pickBestPair(pairs: DexScreenerPair[]): DexScreenerPair | null {
+  if (pairs.length === 0) return null;
+
+  return pairs.reduce((top, pair) =>
+    (pair.liquidity?.usd ?? 0) > (top.liquidity?.usd ?? 0) ? pair : top
+  );
+}
 
 export async function fetchTokenLpInfo(mintAddress: string): Promise<TokenLpInfo> {
   try {
@@ -32,25 +58,38 @@ export async function fetchTokenLpInfo(mintAddress: string): Promise<TokenLpInfo
 
     const payload = (await response.json()) as DexScreenerResponse;
     const pairs = (payload.pairs ?? []).filter(
-      (pair) =>
-        pair.chainId === "solana" &&
-        typeof pair.pairAddress === "string" &&
-        typeof pair.liquidity?.usd === "number"
+      (pair) => pair.chainId === "solana" && typeof pair.pairAddress === "string"
     );
 
-    if (pairs.length === 0) {
-      return EMPTY_LP;
+    const best = pickBestPair(
+      pairs.filter((pair) => typeof pair.liquidity?.usd === "number")
+    );
+
+    if (!best) {
+      const priced = pickBestPair(
+        pairs.filter((pair) => parsePriceUsd(pair.priceUsd) !== null)
+      );
+      if (!priced) return EMPTY_LP;
+
+      return {
+        hasLp: false,
+        poolAddress: priced.pairAddress ?? null,
+        liquidityUsd: priced.liquidity?.usd ?? null,
+        dex: priced.dexId ?? null,
+        priceUsd: parsePriceUsd(priced.priceUsd),
+        marketCapUsd: priced.marketCap ?? priced.fdv ?? null,
+        priceChange24h: priced.priceChange?.h24 ?? null,
+      };
     }
-
-    const best = pairs.reduce((top, pair) =>
-      (pair.liquidity?.usd ?? 0) > (top.liquidity?.usd ?? 0) ? pair : top
-    );
 
     return {
       hasLp: true,
       poolAddress: best.pairAddress ?? null,
       liquidityUsd: best.liquidity?.usd ?? null,
       dex: best.dexId ?? null,
+      priceUsd: parsePriceUsd(best.priceUsd),
+      marketCapUsd: best.marketCap ?? best.fdv ?? null,
+      priceChange24h: best.priceChange?.h24 ?? null,
     };
   } catch {
     return EMPTY_LP;
