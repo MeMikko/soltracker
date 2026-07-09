@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { getJupiterTradeUrl } from "@/lib/jupiter";
+import { getGmgnTradeUrl } from "@/lib/gmgn";
 import { truncateAddress } from "@/lib/format";
 import type { TokenDetails } from "@/lib/types";
 
@@ -13,7 +13,7 @@ export function TokenHeader({ data }: TokenHeaderProps) {
   const [imgError, setImgError] = useState(false);
 
   const displayName = data.name ?? truncateAddress(data.mint, 6);
-  const tradeUrl = getJupiterTradeUrl(data.mint);
+  const tradeUrl = getGmgnTradeUrl(data.mint);
   const showImage = data.imageUrl && !imgError;
 
   return (
@@ -72,7 +72,7 @@ export function TokenHeader({ data }: TokenHeaderProps) {
             d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
           />
         </svg>
-        Trade on Jupiter
+        Trade on GMGN
       </a>
     </div>
   );
