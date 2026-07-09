@@ -1,4 +1,5 @@
 import { getCachedOrFetch } from "@/lib/cache";
+import { normalizeTokenLpInfo } from "@/lib/dexscreener";
 import { hasDatabase } from "@/lib/config";
 import { prisma } from "@/lib/db";
 import { withDbFallback } from "@/lib/db-safe";
@@ -9,7 +10,7 @@ import {
 import type { TokenChainData } from "@/lib/helius/index";
 import { mockTokenChainData } from "@/lib/mock-data";
 
-export const TOKEN_CACHE_KEY_PREFIX = "token:v3:";
+export const TOKEN_CACHE_KEY_PREFIX = "token:v4:";
 
 function tokenCacheKey(mintAddress: string): string {
   return `${TOKEN_CACHE_KEY_PREFIX}${mintAddress}`;
@@ -64,5 +65,11 @@ export async function getTokenData(
     await persistToken(result.data);
   }
 
-  return result;
+  return {
+    ...result,
+    data: {
+      ...result.data,
+      lp: normalizeTokenLpInfo(result.data.lp),
+    },
+  };
 }

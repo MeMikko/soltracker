@@ -17,7 +17,7 @@ interface DexScreenerResponse {
   pairs?: DexScreenerPair[];
 }
 
-const EMPTY_LP: TokenLpInfo = {
+export const EMPTY_TOKEN_LP: TokenLpInfo = {
   hasLp: false,
   poolAddress: null,
   liquidityUsd: null,
@@ -26,6 +26,28 @@ const EMPTY_LP: TokenLpInfo = {
   marketCapUsd: null,
   priceChange24h: null,
 };
+
+function finiteOrNull(value: unknown): number | null {
+  return typeof value === "number" && Number.isFinite(value) ? value : null;
+}
+
+export function normalizeTokenLpInfo(
+  lp: Partial<TokenLpInfo> | null | undefined
+): TokenLpInfo {
+  if (!lp) {
+    return { ...EMPTY_TOKEN_LP };
+  }
+
+  return {
+    hasLp: Boolean(lp.hasLp),
+    poolAddress: lp.poolAddress ?? null,
+    liquidityUsd: finiteOrNull(lp.liquidityUsd),
+    dex: lp.dex ?? null,
+    priceUsd: finiteOrNull(lp.priceUsd),
+    marketCapUsd: finiteOrNull(lp.marketCapUsd),
+    priceChange24h: finiteOrNull(lp.priceChange24h),
+  };
+}
 
 function parsePriceUsd(value: string | number | undefined): number | null {
   if (typeof value === "number" && Number.isFinite(value)) {
@@ -53,7 +75,7 @@ export async function fetchTokenLpInfo(mintAddress: string): Promise<TokenLpInfo
     });
 
     if (!response.ok) {
-      return EMPTY_LP;
+      return { ...EMPTY_TOKEN_LP };
     }
 
     const payload = (await response.json()) as DexScreenerResponse;
@@ -69,7 +91,7 @@ export async function fetchTokenLpInfo(mintAddress: string): Promise<TokenLpInfo
       const priced = pickBestPair(
         pairs.filter((pair) => parsePriceUsd(pair.priceUsd) !== null)
       );
-      if (!priced) return EMPTY_LP;
+      if (!priced) return { ...EMPTY_TOKEN_LP };
 
       return {
         hasLp: false,
@@ -92,6 +114,6 @@ export async function fetchTokenLpInfo(mintAddress: string): Promise<TokenLpInfo
       priceChange24h: best.priceChange?.h24 ?? null,
     };
   } catch {
-    return EMPTY_LP;
+    return { ...EMPTY_TOKEN_LP };
   }
 }

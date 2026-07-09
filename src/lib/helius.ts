@@ -2,6 +2,7 @@
  * Backward-compatible facade over the modular Helius data layer.
  * New code should import from `@/lib/helius/index` or `@/lib/data`.
  */
+import { normalizeTokenLpInfo } from "./dexscreener";
 import {
   detectEntityType,
   fetchTokenChainData,
@@ -43,7 +44,7 @@ function mapToken(data: TokenChainData): TokenDetails {
     decimals: data.decimals,
     creator: data.creatorWallet,
     holderCount: data.holderCount,
-    lp: data.lp,
+    lp: normalizeTokenLpInfo(data.lp),
     mintAuthority: data.mintAuthority,
     freezeAuthority: data.freezeAuthority,
     mintAuthorityRevoked: data.mintAuthorityRevoked,

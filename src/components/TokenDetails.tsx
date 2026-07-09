@@ -30,7 +30,8 @@ export function TokenDetails({ data }: TokenDetailsProps) {
             label="Holder Count"
             value={formatNumber(data.holderCount, 0)}
           />
-          {data.lp.marketCapUsd !== null && (
+          {typeof data.lp.marketCapUsd === "number" &&
+            Number.isFinite(data.lp.marketCapUsd) && (
             <DetailCard
               label="Market Cap"
               value={formatUsdCompact(data.lp.marketCapUsd)}

@@ -1,3 +1,4 @@
+import { normalizeTokenLpInfo } from "@/lib/dexscreener";
 import type { TokenChainData, WalletChainData } from "@/lib/helius/index";
 import type { TokenDetails, WalletDetails } from "@/lib/types";
 
@@ -29,7 +30,7 @@ export function toTokenDetails(data: TokenChainData): TokenDetails {
     decimals: data.decimals,
     creator: data.creatorWallet,
     holderCount: data.holderCount,
-    lp: data.lp,
+    lp: normalizeTokenLpInfo(data.lp),
     mintAuthority: data.mintAuthority,
     freezeAuthority: data.freezeAuthority,
     mintAuthorityRevoked: data.mintAuthorityRevoked,

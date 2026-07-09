@@ -6,6 +6,15 @@ const root = path.dirname(fileURLToPath(import.meta.url));
 
 const nextConfig: NextConfig = {
   outputFileTracingRoot: root,
+  async redirects() {
+    return [
+      {
+        source: "/favicon.ico",
+        destination: "/zenlogo.jpg",
+        permanent: true,
+      },
+    ];
+  },
   transpilePackages: [
     "@wallet-standard/app",
     "@wallet-standard/base",

@@ -1,4 +1,4 @@
-import { fetchTokenLpInfo } from "@/lib/dexscreener";
+import { fetchTokenLpInfo, normalizeTokenLpInfo } from "@/lib/dexscreener";
 import { HeliusError } from "./errors";
 import { heliusRpc } from "./client";
 import { fetchPumpBondingCurveCreator } from "./pump";
@@ -225,6 +225,6 @@ export async function fetchTokenChainData(
     freezeAuthority,
     mintAuthorityRevoked: mintAuthority === null,
     freezeAuthorityRevoked: freezeAuthority === null,
-    lp,
+    lp: normalizeTokenLpInfo(lp),
   };
 }

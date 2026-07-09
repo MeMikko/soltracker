@@ -1,5 +1,4 @@
 import { NextResponse } from "next/server";
-import { WalletAuthRequiredError } from "@/lib/auth/errors";
 import { getWalletFromRequest } from "@/lib/auth/wallet-auth";
 import { handleApiError } from "@/lib/api/handle-error";
 import { getTokenUnlockStatus } from "@/lib/payments/token-unlock-service";
@@ -11,7 +10,11 @@ export async function GET(request: Request) {
   try {
     const wallet = getWalletFromRequest(request);
     if (!wallet) {
-      throw new WalletAuthRequiredError();
+      return NextResponse.json({
+        unlocked: false,
+        expiresAt: null,
+        via: null,
+      });
     }
 
     const { searchParams } = new URL(request.url);

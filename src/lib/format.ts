@@ -27,6 +27,10 @@ export function formatSupply(supply: number, decimals: number): string {
 }
 
 export function formatUsdPrice(price: number): string {
+  if (!Number.isFinite(price) || price < 0) {
+    return "—";
+  }
+
   if (price >= 1) {
     return `$${formatNumber(price, 2)}`;
   }
@@ -40,6 +44,10 @@ export function formatUsdPrice(price: number): string {
 }
 
 export function formatUsdCompact(value: number): string {
+  if (!Number.isFinite(value)) {
+    return "—";
+  }
+
   const abs = Math.abs(value);
   if (abs >= 1_000_000_000) {
     return `$${formatNumber(value / 1_000_000_000, 2)}B`;
@@ -54,6 +62,10 @@ export function formatUsdCompact(value: number): string {
 }
 
 export function formatPercentChange(value: number): string {
+  if (!Number.isFinite(value)) {
+    return "—";
+  }
+
   const sign = value > 0 ? "+" : "";
   return `${sign}${formatNumber(value, 1)}%`;
 }
