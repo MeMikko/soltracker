@@ -16,7 +16,7 @@ export async function GET(request: Request) {
     const { searchParams } = new URL(request.url);
     const wallet = parseSolanaAddress(searchParams.get("wallet") ?? "");
     const challenge = createChallenge(wallet);
-    const message = buildSignInMessage(wallet, challenge);
+    const message = buildSignInMessage(wallet, challenge, request);
 
     return NextResponse.json({ wallet, challenge, message });
   } catch (error) {

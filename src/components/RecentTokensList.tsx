@@ -7,7 +7,7 @@ import { TokenSearchAvatar } from "@/components/TokenSearchAvatar";
 import { useTokenSearches } from "@/hooks/useRecentTokens";
 import { truncateAddress } from "@/lib/format";
 
-const PREVIEW_LIMIT = 6;
+const PREVIEW_LIMIT = 3;
 
 const CARD_CLASS =
   "flex h-full flex-col items-center gap-2 rounded-xl border border-zen-border/70 bg-zen-card/60 px-3 py-4 text-center transition-all hover:border-zen-cyan/30 hover:bg-zen-card hover:shadow-[0_4px_20px_rgba(34,211,238,0.08)]";

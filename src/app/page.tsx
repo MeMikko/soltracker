@@ -173,7 +173,7 @@ export default function HomePage() {
               </p>
             )}
 
-            <div className="mt-14 grid w-full max-w-4xl grid-cols-1 gap-3 xs:grid-cols-2 sm:grid-cols-3">
+            <div className="mt-14 grid w-full max-w-6xl grid-cols-1 gap-3 xs:grid-cols-2 sm:grid-cols-3">
               {FEATURES.map((feature) => (
                 <div key={feature.label} className={FEATURE_CARD_CLASS}>
                   <div

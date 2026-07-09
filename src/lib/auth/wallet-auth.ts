@@ -2,6 +2,7 @@ import { createHmac, timingSafeEqual } from "node:crypto";
 import { PublicKey } from "@solana/web3.js";
 import bs58 from "bs58";
 import nacl from "tweetnacl";
+import { ZENERATING } from "@/lib/brand/zenerating";
 import { safeParseSolanaAddress } from "@/lib/validation";
 
 export const SESSION_COOKIE = "si_wallet_session";
@@ -20,12 +21,57 @@ export function isWalletAuthDisabled(): boolean {
   return process.env.WALLET_AUTH_DISABLED === "true";
 }
 
-export function buildSignInMessage(wallet: string, challenge: string): string {
+function trimTrailingSlash(url: string): string {
+  return url.replace(/\/$/, "");
+}
+
+export function getAppUrlFromRequest(request: Request): string | null {
+  const forwardedHost = request.headers.get("x-forwarded-host");
+  const host =
+    forwardedHost?.split(",")[0]?.trim() || request.headers.get("host");
+
+  if (host) {
+    const forwardedProto = request.headers.get("x-forwarded-proto");
+    const proto =
+      forwardedProto?.split(",")[0]?.trim() ||
+      (process.env.NODE_ENV === "production" ? "https" : "http");
+
+    return trimTrailingSlash(`${proto}://${host}`);
+  }
+
+  try {
+    return trimTrailingSlash(new URL(request.url).origin);
+  } catch {
+    return null;
+  }
+}
+
+export function resolveAppUrl(request?: Request): string {
+  const configured = process.env.NEXT_PUBLIC_APP_URL?.trim();
+  if (configured) {
+    return trimTrailingSlash(configured);
+  }
+
+  if (request) {
+    const fromRequest = getAppUrlFromRequest(request);
+    if (fromRequest) {
+      return fromRequest;
+    }
+  }
+
+  return "http://localhost:3000";
+}
+
+export function buildSignInMessage(
+  wallet: string,
+  challenge: string,
+  request?: Request
+): string {
   const issuedAt = new Date().toISOString();
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
+  const appUrl = resolveAppUrl(request);
 
   return [
-    "Solana Intelligence wants you to sign in with your Solana account:",
+    `${ZENERATING.name} wants you to sign in with your Solana account:`,
     wallet,
     "",
     `URI: ${appUrl}`,

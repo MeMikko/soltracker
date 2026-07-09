@@ -220,7 +220,7 @@ function RoadmapCard({ item }: { item: RoadmapItem }) {
 
 export function ComingSoonSection() {
   return (
-    <section className="mt-20 w-full max-w-4xl">
+    <section className="mt-20 w-full max-w-6xl">
       <div className="mb-12 text-center">
         <span className="section-label">Product roadmap</span>
         <h2 className="mt-2 text-2xl font-bold tracking-tight sm:text-3xl">
