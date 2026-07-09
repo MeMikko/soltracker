@@ -84,9 +84,9 @@ const ROADMAP: RoadmapItem[] = [
   },
   {
     phase: 8,
-    title: "Watchlists & Pro",
+    title: "Watchlists for Tokens & Wallets",
     description:
-      "Save addresses, track changes over time, and unlock unlimited searches with a Pro subscription.",
+      "Save tokens and wallets you care about, revisit them in one place, and track risk and activity changes over time.",
     status: "soon",
     tier: "pro",
     accent: "from-zen-cyan/10 via-transparent to-zen-purple/15",
@@ -227,8 +227,8 @@ export function ComingSoonSection() {
           <span className="gradient-text">Building with intention</span>
         </h2>
         <p className="mx-auto mt-3 max-w-md text-sm leading-relaxed text-gray-500">
-          Phases 1–3 are free. Phases 4–6 are live on Pro. Alerts, extension,
-          and AI intelligence are next.
+          Phases 1–3 are free. Phases 4–6 are live on Pro. Watchlists, alerts,
+          extension, and AI intelligence are next.
         </p>
 
         <div className="mx-auto mt-8 max-w-md">
