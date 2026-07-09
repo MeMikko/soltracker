@@ -16,21 +16,27 @@ import { searchAddress } from "@/lib/api-client";
 import { ZENERATING } from "@/lib/brand/zenerating";
 import type { ApiError } from "@/lib/types";
 
+const FEATURE_CARD_CLASS =
+  "flex h-full flex-col items-center gap-2 rounded-xl border border-zen-border/70 bg-zen-card/60 px-3 py-4 text-center transition-all hover:border-zen-cyan/30 hover:bg-zen-card hover:shadow-[0_4px_20px_rgba(34,211,238,0.08)]";
+
 const FEATURES = [
   {
     label: "Risk Scoring",
     desc: "Free · 0–100 score with factor breakdown",
-    accent: "from-zen-cyan/20 to-transparent",
+    abbr: "RS",
+    iconClass: "bg-zen-cyan/15 text-zen-cyan",
   },
   {
     label: "Token & Wallet",
     desc: "Free · LP, mint authority, balance & activity",
-    accent: "from-zen-purple/20 to-transparent",
+    abbr: "TW",
+    iconClass: "bg-solana-purple/15 text-solana-purple",
   },
   {
     label: "Pro Intelligence",
     desc: "Clustering, holder analytics & deployer history",
-    accent: "from-zen-sage/25 to-transparent",
+    abbr: "PI",
+    iconClass: "bg-zen-sage/15 text-zen-sage",
   },
 ];
 
@@ -141,22 +147,22 @@ export default function HomePage() {
               </p>
             )}
 
-            <div className="mt-14 grid w-full max-w-3xl grid-cols-1 gap-4 xs:grid-cols-3">
+            <div className="mt-14 grid w-full max-w-4xl grid-cols-1 gap-3 xs:grid-cols-2 sm:grid-cols-3">
               {FEATURES.map((feature) => (
-                <div
-                  key={feature.label}
-                  className="crypto-card-hover group relative overflow-hidden p-5 text-center"
-                >
+                <div key={feature.label} className={FEATURE_CARD_CLASS}>
                   <div
-                    className={`pointer-events-none absolute inset-0 bg-gradient-to-b ${feature.accent} opacity-0 transition-opacity duration-300 group-hover:opacity-100`}
-                    aria-hidden
-                  />
-                  <p className="relative text-sm font-semibold text-white">
-                    {feature.label}
-                  </p>
-                  <p className="relative mt-1.5 text-xs leading-relaxed text-gray-500">
-                    {feature.desc}
-                  </p>
+                    className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-xl border border-zen-border/80 text-xs font-bold ${feature.iconClass}`}
+                  >
+                    {feature.abbr}
+                  </div>
+                  <div className="min-w-0 w-full">
+                    <p className="truncate text-sm font-medium text-white">
+                      {feature.label}
+                    </p>
+                    <p className="mt-0.5 text-[10px] leading-relaxed text-gray-600">
+                      {feature.desc}
+                    </p>
+                  </div>
                 </div>
               ))}
             </div>
