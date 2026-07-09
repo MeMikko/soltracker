@@ -25,7 +25,7 @@ import {
   searchAddress,
 } from "@/lib/api-client";
 import { truncateAddress } from "@/lib/format";
-import { addRecentToken } from "@/lib/recent-tokens";
+
 import type {
   ApiError,
   EntityType,
@@ -60,8 +60,6 @@ export function ResultsContent() {
   const [wallet, setWallet] = useState<WalletDetailsType | null>(null);
   const [token, setToken] = useState<TokenDetailsType | null>(null);
   const requestIdRef = useRef(0);
-  const usageRef = useRef(usage);
-  usageRef.current = usage;
 
   const loadResults = useCallback(async () => {
     const requestId = ++requestIdRef.current;
@@ -69,7 +67,6 @@ export function ResultsContent() {
     setError(null);
 
     let type = typeParam;
-    let walletForRecent = usageRef.current?.wallet ?? null;
 
     if (!type) {
       const search = await searchAddress(address);
@@ -83,7 +80,6 @@ export function ResultsContent() {
       type = search.data.type;
       setEntityType(type);
       applyUsage(setUsage, search.usage);
-      if (search.usage?.wallet) walletForRecent = search.usage.wallet;
     }
 
     const riskResult = await fetchRisk(type, address);
@@ -96,7 +92,6 @@ export function ResultsContent() {
     }
 
     applyUsage(setUsage, riskResult.usage);
-    if (riskResult.usage?.wallet) walletForRecent = riskResult.usage.wallet;
     setRisk(riskResult.data);
     setEntityType(type);
 
@@ -114,24 +109,13 @@ export function ResultsContent() {
     }
 
     applyUsage(setUsage, detailsResult.usage);
-    if (detailsResult.usage?.wallet) walletForRecent = detailsResult.usage.wallet;
 
     if (type === "wallet") {
       setWallet(detailsResult.data as WalletDetailsType);
       setToken(null);
     } else {
-      const tokenData = detailsResult.data as TokenDetailsType;
-      setToken(tokenData);
+      setToken(detailsResult.data as TokenDetailsType);
       setWallet(null);
-      addRecentToken(
-        {
-          mint: tokenData.mint,
-          name: tokenData.name,
-          symbol: tokenData.symbol,
-          imageUrl: tokenData.imageUrl,
-        },
-        walletForRecent
-      );
     }
 
     setLoading(false);
@@ -207,10 +191,7 @@ export function ResultsContent() {
             }
             compact
           />
-          <RecentTokensList
-            wallet={usage?.wallet}
-            authenticated={isAuthenticated}
-          />
+          <RecentTokensList />
         </div>
 
         {loading ? (

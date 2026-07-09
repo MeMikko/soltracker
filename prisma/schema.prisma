@@ -112,6 +112,19 @@ model WalletCluster {
   @@index([expiresAt])
 }
 
+/// Globally tracked token searches — one row per mint, deduplicated on the homepage.
+model TokenSearchStat {
+  mintAddress    String   @id
+  name           String?
+  symbol         String?
+  imageUrl       String?  @db.Text
+  searchCount    Int      @default(1)
+  lastSearchedAt DateTime @default(now())
+
+  @@index([lastSearchedAt])
+  @@index([searchCount])
+}
+
 /// Directed connection between two wallets in a cluster graph.
 model ClusterEdge {
   id        String        @id @default(cuid())

@@ -2,6 +2,7 @@ import type { ClusterGraph } from "@/lib/clustering/types";
 import type { TokenAnalytics } from "@/lib/data/token-analytics-service";
 import type {
   ApiError,
+  RecentToken,
   RiskResponse,
   SearchResponse,
   TokenDetails,
@@ -23,6 +24,18 @@ function extractUsage<T extends { usage?: UsageResponse }>(
 ): { data: Omit<T, "usage">; usage: UsageResponse | null } {
   const { usage, ...data } = body;
   return { data: data as Omit<T, "usage">, usage: usage ?? null };
+}
+
+export async function fetchRecentTokens(
+  limit = 10
+): Promise<RecentToken[]> {
+  const res = await fetch(`/api/tokens/recent?limit=${limit}`, fetchOptions);
+  if (!res.ok) return [];
+
+  const body = (await parseJson<{ tokens?: RecentToken[] }>(res)) as {
+    tokens?: RecentToken[];
+  };
+  return body.tokens ?? [];
 }
 
 export async function fetchUsage(): Promise<UsageResponse> {

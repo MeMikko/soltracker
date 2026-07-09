@@ -5,11 +5,6 @@ import { useState } from "react";
 import { useRecentTokens } from "@/hooks/useRecentTokens";
 import { truncateAddress } from "@/lib/format";
 
-interface RecentTokensListProps {
-  wallet: string | null | undefined;
-  authenticated: boolean;
-}
-
 function TokenAvatar({
   symbol,
   mint,
@@ -44,13 +39,10 @@ function TokenAvatar({
   );
 }
 
-export function RecentTokensList({
-  wallet,
-  authenticated,
-}: RecentTokensListProps) {
-  const { tokens } = useRecentTokens(wallet);
+export function RecentTokensList() {
+  const { tokens, loading } = useRecentTokens();
 
-  if (tokens.length === 0) {
+  if (loading || tokens.length === 0) {
     return null;
   }
 
@@ -58,38 +50,15 @@ export function RecentTokensList({
     <section className="mt-8 w-full max-w-2xl">
       <div className="mb-3 flex items-center justify-between gap-2">
         <h2 className="text-xs font-semibold uppercase tracking-[0.2em] text-zen-sage">
-          Recently viewed
+          Recently searched
         </h2>
-        <span className="text-[10px] text-gray-600">{tokens.length} tokens</span>
+        <span className="text-[10px] text-gray-600">Community</span>
       </div>
 
       <ul className="grid gap-2 sm:grid-cols-2">
         {tokens.map((token) => {
           const label = token.name ?? token.symbol ?? truncateAddress(token.mint, 4);
           const href = `/results/${encodeURIComponent(token.mint)}?type=token`;
-
-          if (!authenticated) {
-            return (
-              <li key={token.mint}>
-                <div className="flex items-center gap-3 rounded-xl border border-zen-border/60 bg-zen-card/40 px-3 py-2.5 opacity-60">
-                  <TokenAvatar
-                    symbol={token.symbol}
-                    mint={token.mint}
-                    imageUrl={token.imageUrl}
-                    name={token.name}
-                  />
-                  <div className="min-w-0">
-                    <p className="truncate text-sm font-medium text-gray-400">
-                      {label}
-                    </p>
-                    {token.symbol && (
-                      <p className="text-[11px] text-gray-600">${token.symbol}</p>
-                    )}
-                  </div>
-                </div>
-              </li>
-            );
-          }
 
           return (
             <li key={token.mint}>
@@ -110,6 +79,7 @@ export function RecentTokensList({
                   <p className="truncate font-mono text-[10px] text-gray-600">
                     {token.symbol ? `$${token.symbol} · ` : ""}
                     {truncateAddress(token.mint, 4)}
+                    {token.searchCount > 1 ? ` · ${token.searchCount} searches` : ""}
                   </p>
                 </div>
                 <svg

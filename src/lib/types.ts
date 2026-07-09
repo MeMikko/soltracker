@@ -64,6 +64,15 @@ export interface SearchResponse {
   type: EntityType;
 }
 
+export interface RecentToken {
+  mint: string;
+  name: string | null;
+  symbol: string | null;
+  imageUrl: string | null;
+  searchCount: number;
+  lastSearchedAt: string;
+}
+
 export interface UsageResponse {
   used: number;
   limit: number;

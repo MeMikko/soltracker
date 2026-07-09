@@ -8,3 +8,7 @@ export type { TokenAnalytics } from "./token-analytics-service";
 export { getWalletCluster, getTokenCreatorCluster } from "./cluster-service";
 export { computeAndPersistRisk } from "./risk-service";
 export { getSearchUsage, consumeSearch } from "./search-log";
+export {
+  getRecentTokenSearches,
+  recordTokenSearch,
+} from "./token-search-stats";

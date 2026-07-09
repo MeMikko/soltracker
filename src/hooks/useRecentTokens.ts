@@ -1,31 +1,31 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import {
-  getRecentTokens,
-  RECENT_TOKENS_CHANGED,
-  type RecentToken,
-} from "@/lib/recent-tokens";
+import { fetchRecentTokens } from "@/lib/api-client";
+import type { RecentToken } from "@/lib/types";
 
-export function useRecentTokens(wallet: string | null | undefined) {
+export function useRecentTokens(limit = 10) {
   const [tokens, setTokens] = useState<RecentToken[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const refresh = useCallback(() => {
-    setTokens(getRecentTokens(wallet));
-  }, [wallet]);
+  const refresh = useCallback(async () => {
+    setLoading(true);
+    try {
+      setTokens(await fetchRecentTokens(limit));
+    } catch {
+      setTokens([]);
+    } finally {
+      setLoading(false);
+    }
+  }, [limit]);
 
   useEffect(() => {
-    refresh();
+    void refresh();
 
-    const onChange = () => refresh();
-    window.addEventListener(RECENT_TOKENS_CHANGED, onChange);
-    window.addEventListener("wallet-session-changed", onChange);
-
-    return () => {
-      window.removeEventListener(RECENT_TOKENS_CHANGED, onChange);
-      window.removeEventListener("wallet-session-changed", onChange);
-    };
+    const onFocus = () => void refresh();
+    window.addEventListener("focus", onFocus);
+    return () => window.removeEventListener("focus", onFocus);
   }, [refresh]);
 
-  return { tokens, refresh };
+  return { tokens, loading, refresh };
 }

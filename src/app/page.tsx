@@ -126,10 +126,7 @@ export default function HomePage() {
               </div>
             </div>
 
-            <RecentTokensList
-              wallet={usage?.wallet}
-              authenticated={isAuthenticated}
-            />
+            <RecentTokensList />
 
             {usage?.tier === "free" && usage.remaining === 0 && isAuthenticated && (
               <p className="mt-4 text-center text-sm text-accent-red">
