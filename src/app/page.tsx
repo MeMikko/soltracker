@@ -5,6 +5,7 @@ import { useState } from "react";
 import { AppShell } from "@/components/AppShell";
 import { ErrorState } from "@/components/ErrorState";
 import { LoadingState } from "@/components/LoadingState";
+import { FeaturedToken } from "@/components/FeaturedToken";
 import { RecentTokensList } from "@/components/RecentTokensList";
 import { SearchBar } from "@/components/SearchBar";
 import { UpgradeModal } from "@/components/UpgradeModal";
@@ -132,6 +133,7 @@ export default function HomePage() {
               </div>
             </div>
 
+            <FeaturedToken />
             <RecentTokensList />
 
             {usage?.tier === "free" && usage.remaining === 0 && isAuthenticated && (
