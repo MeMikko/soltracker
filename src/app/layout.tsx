@@ -19,8 +19,8 @@ export const metadata: Metadata = {
   description:
     "Calm, clear-headed due diligence for Solana wallets and tokens. Risk scores, clustering, and on-chain intelligence.",
   icons: {
-    icon: "/zenlogo.jpg",
-    apple: "/zenlogo.jpg",
+    icon: "/icon.svg",
+    apple: "/icon.svg",
   },
 };
 

@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" role="img" aria-label="Zenerating">
+  <defs>
+    <radialGradient id="blob" cx="48%" cy="42%" r="58%">
+      <stop offset="0%" stop-color="#5eead4"/>
+      <stop offset="45%" stop-color="#22d3ee"/>
+      <stop offset="100%" stop-color="#7c3aed"/>
+    </radialGradient>
+    <linearGradient id="ring" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#e0f2fe"/>
+      <stop offset="50%" stop-color="#ffffff"/>
+      <stop offset="100%" stop-color="#c4b5fd"/>
+    </linearGradient>
+  </defs>
+  <circle cx="50" cy="50" r="41" fill="none" stroke="url(#ring)" stroke-width="1.2"/>
+  <path d="M 50 22 C 62 22 68 30 68 40 C 68 54 58 58 50 62 C 42 58 32 54 32 40 C 32 30 38 22 50 22 Z" fill="url(#blob)"/>
+  <g stroke="#f8fafc" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="none">
+    <path d="M 36 34 L 36 66"/>
+    <path d="M 36 50 L 54 50"/>
+    <path d="M 54 50 L 60 38 L 66 50"/>
+    <path d="M 54 50 L 60 64"/>
+  </g>
+</svg>

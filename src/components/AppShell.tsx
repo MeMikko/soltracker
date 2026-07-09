@@ -28,7 +28,7 @@ export function AppShell({
         <div className="mx-auto flex w-full max-w-6xl flex-col gap-3 px-4 py-3 sm:flex-row sm:items-center sm:justify-between sm:px-6 sm:py-3.5">
           <div className="flex min-w-0 items-center gap-3">
             <Link href="/" className="group flex shrink-0 items-center gap-3">
-              <ZenLogo size="sm" showGlow className="transition-transform group-hover:scale-105" />
+              <ZenLogo size="sm" className="transition-transform duration-300 group-hover:scale-110" />
               <span className="flex flex-col leading-tight">
                 <span className="text-sm font-semibold tracking-tight text-white transition-colors group-hover:text-zen-cyan/90">
                   {ZENERATING.name}

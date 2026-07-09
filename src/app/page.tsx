@@ -94,12 +94,8 @@ export default function HomePage() {
           </div>
         ) : (
           <div className="flex flex-col items-center">
-            <div className="relative mb-6">
-              <span
-                className="absolute inset-0 -m-8 rounded-full bg-gradient-to-br from-zen-cyan/25 via-zen-purple/15 to-transparent blur-2xl animate-zen-pulse"
-                aria-hidden
-              />
-              <ZenLogo size="hero" showGlow className="shadow-zen-logo" />
+            <div className="mb-6">
+              <ZenLogo size="hero" showGlow />
             </div>
 
             <div className="mb-4 flex items-center gap-2 rounded-full border border-zen-border/60 bg-zen-card/50 px-3.5 py-1.5 text-xs text-gray-500 backdrop-blur-sm">

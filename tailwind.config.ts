@@ -67,6 +67,8 @@ const config: Config = {
         "pulse-glow": "pulse-glow 2.5s ease-in-out infinite",
         shimmer: "shimmer 2s linear infinite",
         "zen-pulse": "zen-pulse 4s ease-in-out infinite",
+        "zen-breathe": "zen-breathe 5s ease-in-out infinite",
+        "zen-spin-slow": "zen-spin 24s linear infinite",
         "zen-float": "zen-float 8s ease-in-out infinite",
         "zen-float-slow": "zen-float 12s ease-in-out infinite reverse",
       },
@@ -82,6 +84,14 @@ const config: Config = {
         "zen-pulse": {
           "0%, 100%": { opacity: "0.5", transform: "scale(1)" },
           "50%": { opacity: "0.9", transform: "scale(1.05)" },
+        },
+        "zen-breathe": {
+          "0%, 100%": { opacity: "0.55", transform: "scale(0.96)" },
+          "50%": { opacity: "1", transform: "scale(1.04)" },
+        },
+        "zen-spin": {
+          from: { transform: "rotate(0deg)" },
+          to: { transform: "rotate(360deg)" },
         },
         "zen-float": {
           "0%, 100%": { transform: "translate(0, 0)" },
