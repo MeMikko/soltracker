@@ -2,45 +2,16 @@
 
 import Link from "next/link";
 import { useState } from "react";
-import { useRecentTokens } from "@/hooks/useRecentTokens";
+import { AllSearchedTokensModal } from "@/components/AllSearchedTokensModal";
+import { TokenSearchAvatar } from "@/components/TokenSearchAvatar";
+import { useTokenSearches } from "@/hooks/useRecentTokens";
 import { truncateAddress } from "@/lib/format";
 
-function TokenAvatar({
-  symbol,
-  mint,
-  imageUrl,
-  name,
-}: {
-  symbol: string | null;
-  mint: string;
-  imageUrl: string | null;
-  name: string | null;
-}) {
-  const [imgError, setImgError] = useState(false);
-  const showImage = imageUrl && !imgError;
-  const fallback = (symbol ?? name ?? mint).slice(0, 2).toUpperCase();
-
-  return (
-    <div className="relative h-11 w-11 shrink-0 overflow-hidden rounded-xl border border-zen-border/80 bg-zen-deep">
-      {showImage ? (
-        // eslint-disable-next-line @next/next/no-img-element
-        <img
-          src={imageUrl}
-          alt={name ?? symbol ?? mint}
-          className="h-full w-full object-cover"
-          onError={() => setImgError(true)}
-        />
-      ) : (
-        <div className="flex h-full w-full items-center justify-center bg-zen-sage/15 text-xs font-bold text-zen-sage">
-          {fallback}
-        </div>
-      )}
-    </div>
-  );
-}
+const PREVIEW_LIMIT = 6;
 
 export function RecentTokensList() {
-  const { tokens, loading } = useRecentTokens();
+  const { tokens, total, loading } = useTokenSearches(PREVIEW_LIMIT, "popular");
+  const [allOpen, setAllOpen] = useState(false);
 
   if (loading) {
     return null;
@@ -48,9 +19,9 @@ export function RecentTokensList() {
 
   if (tokens.length === 0) {
     return (
-      <section className="mt-8 w-full max-w-2xl">
+      <section className="mt-8 w-full max-w-4xl">
         <h2 className="mb-2 text-xs font-semibold uppercase tracking-[0.2em] text-zen-sage">
-          Recently searched
+          Most searched
         </h2>
         <p className="rounded-xl border border-zen-border/50 bg-zen-card/30 px-4 py-3 text-center text-sm text-gray-500">
           No community searches yet. Search a token to populate this list.
@@ -60,60 +31,71 @@ export function RecentTokensList() {
   }
 
   return (
-    <section className="mt-8 w-full max-w-2xl">
-      <div className="mb-3 flex items-center justify-between gap-2">
-        <h2 className="text-xs font-semibold uppercase tracking-[0.2em] text-zen-sage">
-          Recently searched
-        </h2>
-        <span className="text-[10px] text-gray-600">Community</span>
-      </div>
+    <>
+      <section className="mt-8 w-full max-w-4xl">
+        <div className="mb-3 flex items-center justify-between gap-2">
+          <h2 className="text-xs font-semibold uppercase tracking-[0.2em] text-zen-sage">
+            Most searched
+          </h2>
+          {total > PREVIEW_LIMIT && (
+            <button
+              type="button"
+              onClick={() => setAllOpen(true)}
+              className="text-[10px] font-medium text-zen-cyan transition-colors hover:text-zen-cyan/80"
+            >
+              View all {total} tokens
+            </button>
+          )}
+        </div>
 
-      <ul className="grid gap-2 sm:grid-cols-2">
-        {tokens.map((token) => {
-          const label = token.name ?? token.symbol ?? truncateAddress(token.mint, 4);
-          const href = `/results/${encodeURIComponent(token.mint)}?type=token`;
+        <ul className="grid grid-cols-1 gap-3 xs:grid-cols-2 sm:grid-cols-3">
+          {tokens.map((token) => {
+            const label =
+              token.name ?? token.symbol ?? truncateAddress(token.mint, 4);
+            const href = `/results/${encodeURIComponent(token.mint)}?type=token`;
 
-          return (
-            <li key={token.mint}>
-              <Link
-                href={href}
-                className="group flex items-center gap-3 rounded-xl border border-zen-border/70 bg-zen-card/60 px-3 py-2.5 transition-all hover:border-zen-cyan/30 hover:bg-zen-card hover:shadow-[0_4px_20px_rgba(34,211,238,0.08)]"
-              >
-                <TokenAvatar
-                  symbol={token.symbol}
-                  mint={token.mint}
-                  imageUrl={token.imageUrl}
-                  name={token.name}
-                />
-                <div className="min-w-0 flex-1">
-                  <p className="truncate text-sm font-medium text-white group-hover:text-zen-cyan/90">
-                    {label}
-                  </p>
-                  <p className="truncate font-mono text-[10px] text-gray-600">
-                    {token.symbol ? `$${token.symbol} · ` : ""}
-                    {truncateAddress(token.mint, 4)}
-                    {token.searchCount > 1 ? ` · ${token.searchCount} searches` : ""}
-                  </p>
-                </div>
-                <svg
-                  className="h-4 w-4 shrink-0 text-gray-600 transition-transform group-hover:translate-x-0.5 group-hover:text-zen-cyan"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                  aria-hidden
+            return (
+              <li key={token.mint}>
+                <Link
+                  href={href}
+                  className="group flex h-full flex-col items-center gap-2 rounded-xl border border-zen-border/70 bg-zen-card/60 px-3 py-4 text-center transition-all hover:border-zen-cyan/30 hover:bg-zen-card hover:shadow-[0_4px_20px_rgba(34,211,238,0.08)]"
                 >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M9 5l7 7-7 7"
+                  <TokenSearchAvatar
+                    symbol={token.symbol}
+                    mint={token.mint}
+                    imageUrl={token.imageUrl}
+                    name={token.name}
                   />
-                </svg>
-              </Link>
-            </li>
-          );
-        })}
-      </ul>
-    </section>
+                  <div className="min-w-0 w-full">
+                    <p className="truncate text-sm font-medium text-white group-hover:text-zen-cyan/90">
+                      {label}
+                    </p>
+                    <p className="mt-0.5 truncate font-mono text-[10px] text-gray-600">
+                      {token.symbol ? `$${token.symbol}` : truncateAddress(token.mint, 4)}
+                    </p>
+                    <p className="mt-1 text-[10px] font-medium text-zen-sage">
+                      {token.searchCount}{" "}
+                      {token.searchCount === 1 ? "search" : "searches"}
+                    </p>
+                  </div>
+                </Link>
+              </li>
+            );
+          })}
+        </ul>
+
+        {total > 0 && total <= PREVIEW_LIMIT && (
+          <button
+            type="button"
+            onClick={() => setAllOpen(true)}
+            className="mt-3 w-full text-center text-[10px] font-medium text-gray-500 transition-colors hover:text-zen-cyan"
+          >
+            View all searched tokens
+          </button>
+        )}
+      </section>
+
+      <AllSearchedTokensModal open={allOpen} onClose={() => setAllOpen(false)} />
+    </>
   );
 }

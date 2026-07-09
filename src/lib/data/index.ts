@@ -10,5 +10,7 @@ export { computeAndPersistRisk } from "./risk-service";
 export { getSearchUsage, consumeSearch } from "./search-log";
 export {
   getRecentTokenSearches,
+  getTokenSearches,
   recordTokenSearch,
 } from "./token-search-stats";
+export type { TokenSearchSort } from "./token-search-stats";

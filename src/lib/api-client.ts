@@ -26,16 +26,39 @@ function extractUsage<T extends { usage?: UsageResponse }>(
   return { data: data as Omit<T, "usage">, usage: usage ?? null };
 }
 
+export interface TokenSearchList {
+  tokens: RecentToken[];
+  total: number;
+}
+
+export async function fetchTokenSearches(
+  limit = 10,
+  sort: "popular" | "recent" = "popular"
+): Promise<TokenSearchList> {
+  const params = new URLSearchParams({
+    limit: String(limit),
+    sort,
+  });
+  const res = await fetch(`/api/tokens/recent?${params}`, fetchOptions);
+  if (!res.ok) return { tokens: [], total: 0 };
+
+  const body = await parseJson<{
+    tokens?: RecentToken[];
+    total?: number;
+  }>(res);
+
+  return {
+    tokens: body.tokens ?? [],
+    total: body.total ?? body.tokens?.length ?? 0,
+  };
+}
+
+/** @deprecated Use fetchTokenSearches */
 export async function fetchRecentTokens(
   limit = 10
 ): Promise<RecentToken[]> {
-  const res = await fetch(`/api/tokens/recent?limit=${limit}`, fetchOptions);
-  if (!res.ok) return [];
-
-  const body = (await parseJson<{ tokens?: RecentToken[] }>(res)) as {
-    tokens?: RecentToken[];
-  };
-  return body.tokens ?? [];
+  const result = await fetchTokenSearches(limit, "recent");
+  return result.tokens;
 }
 
 export async function fetchUsage(): Promise<UsageResponse> {

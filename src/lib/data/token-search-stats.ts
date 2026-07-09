@@ -4,6 +4,9 @@ import { withDbFallback } from "@/lib/db-safe";
 import type { RecentToken } from "@/lib/types";
 
 const DEFAULT_LIMIT = 10;
+const MAX_LIMIT = 500;
+
+export type TokenSearchSort = "popular" | "recent";
 
 interface TokenSearchInput {
   mint: string;
@@ -54,11 +57,29 @@ function memoryRecordTokenSearch(input: TokenSearchInput): void {
   });
 }
 
-function memoryGetRecentTokenSearches(limit: number): RecentToken[] {
-  return [...memoryStats.values()]
-    .sort((a, b) => b.lastSearchedAt - a.lastSearchedAt)
-    .slice(0, limit)
-    .map((stat) => toRecentToken(stat));
+function memorySortStats(
+  stats: MemoryTokenSearchStat[],
+  sort: TokenSearchSort
+): MemoryTokenSearchStat[] {
+  return [...stats].sort((a, b) => {
+    if (sort === "popular") {
+      if (b.searchCount !== a.searchCount) {
+        return b.searchCount - a.searchCount;
+      }
+    }
+    return b.lastSearchedAt - a.lastSearchedAt;
+  });
+}
+
+function memoryGetTokenSearches(
+  limit: number,
+  sort: TokenSearchSort
+): { tokens: RecentToken[]; total: number } {
+  const sorted = memorySortStats([...memoryStats.values()], sort);
+  return {
+    tokens: sorted.slice(0, limit).map((stat) => toRecentToken(stat)),
+    total: sorted.length,
+  };
 }
 
 export async function recordTokenSearch(input: TokenSearchInput): Promise<void> {
@@ -92,33 +113,58 @@ export async function recordTokenSearch(input: TokenSearchInput): Promise<void> 
   );
 }
 
+function orderByForSort(sort: TokenSearchSort) {
+  return sort === "popular"
+    ? [{ searchCount: "desc" as const }, { lastSearchedAt: "desc" as const }]
+    : [{ lastSearchedAt: "desc" as const }];
+}
+
+export async function getTokenSearches(
+  limit = DEFAULT_LIMIT,
+  sort: TokenSearchSort = "popular"
+): Promise<{ tokens: RecentToken[]; total: number }> {
+  const safeLimit = Math.min(Math.max(limit, 1), MAX_LIMIT);
+
+  if (!hasDatabase()) {
+    return memoryGetTokenSearches(safeLimit, sort);
+  }
+
+  const [rows, total] = await Promise.all([
+    withDbFallback(
+      () =>
+        prisma.tokenSearchStat.findMany({
+          orderBy: orderByForSort(sort),
+          take: safeLimit,
+        }),
+      [],
+      "token searches"
+    ),
+    withDbFallback(
+      () => prisma.tokenSearchStat.count(),
+      0,
+      "token search count"
+    ),
+  ]);
+
+  return {
+    tokens: rows.map((row) =>
+      toRecentToken({
+        mint: row.mintAddress,
+        name: row.name,
+        symbol: row.symbol,
+        imageUrl: row.imageUrl,
+        searchCount: row.searchCount,
+        lastSearchedAt: row.lastSearchedAt,
+      })
+    ),
+    total,
+  };
+}
+
+/** @deprecated Use getTokenSearches */
 export async function getRecentTokenSearches(
   limit = DEFAULT_LIMIT
 ): Promise<RecentToken[]> {
-  const safeLimit = Math.min(Math.max(limit, 1), 50);
-
-  if (!hasDatabase()) {
-    return memoryGetRecentTokenSearches(safeLimit);
-  }
-
-  const rows = await withDbFallback(
-    () =>
-      prisma.tokenSearchStat.findMany({
-        orderBy: { lastSearchedAt: "desc" },
-        take: safeLimit,
-      }),
-    [],
-    "recent token searches"
-  );
-
-  return rows.map((row) =>
-    toRecentToken({
-      mint: row.mintAddress,
-      name: row.name,
-      symbol: row.symbol,
-      imageUrl: row.imageUrl,
-      searchCount: row.searchCount,
-      lastSearchedAt: row.lastSearchedAt,
-    })
-  );
+  const result = await getTokenSearches(limit, "recent");
+  return result.tokens;
 }
