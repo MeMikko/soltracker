@@ -62,7 +62,7 @@ export function FeaturedToken({ className }: FeaturedTokenProps = {}) {
   const label = token?.name ?? token?.symbol ?? truncateAddress(mint, 4);
 
   return (
-    <section className={`relative mt-8 w-full max-w-6xl ${className ?? ""}`}>
+    <section className={`relative w-full max-w-6xl ${className ?? ""}`}>
       <div
         className="pointer-events-none absolute -inset-px rounded-2xl bg-gradient-to-r from-zen-cyan/50 via-zen-purple/40 to-zen-cyan/50 opacity-60 blur-[1px]"
         aria-hidden

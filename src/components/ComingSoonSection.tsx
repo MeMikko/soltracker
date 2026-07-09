@@ -218,9 +218,13 @@ function RoadmapCard({ item }: { item: RoadmapItem }) {
   );
 }
 
-export function ComingSoonSection() {
+interface ComingSoonSectionProps {
+  className?: string;
+}
+
+export function ComingSoonSection({ className }: ComingSoonSectionProps = {}) {
   return (
-    <section className="mt-20 w-full max-w-6xl">
+    <section className={`w-full max-w-6xl ${className ?? ""}`}>
       <div className="mb-12 text-center">
         <span className="section-label">Product roadmap</span>
         <h2 className="mt-2 text-2xl font-bold tracking-tight sm:text-3xl">

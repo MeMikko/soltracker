@@ -38,7 +38,7 @@ export function RecentTokensList({ className }: RecentTokensListProps = {}) {
 
   if (!showSkeletons && tokens.length === 0) {
     return (
-      <section className={`mt-8 w-full max-w-6xl ${className ?? ""}`}>
+      <section className={`w-full max-w-6xl ${className ?? ""}`}>
         <h2 className="mb-2 text-xs font-semibold uppercase tracking-[0.2em] text-zen-sage">
           Most searched
         </h2>
@@ -51,7 +51,7 @@ export function RecentTokensList({ className }: RecentTokensListProps = {}) {
 
   return (
     <>
-      <section className={`mt-8 w-full max-w-6xl ${className ?? ""}`}>
+      <section className={`w-full max-w-6xl ${className ?? ""}`}>
         <div className="mb-3 flex items-center justify-between gap-2">
           <h2 className="text-xs font-semibold uppercase tracking-[0.2em] text-zen-sage">
             Most searched

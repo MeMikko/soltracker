@@ -130,30 +130,31 @@ export default function HomePage() {
               {ZENERATING.subtagline}
             </p>
 
-            <div className="crypto-card mt-8 w-full max-w-6xl p-4 sm:p-5">
-              <WalletGate authenticated={isAuthenticated} />
-              <div className={isAuthenticated ? "mt-4" : ""}>
-                <SearchBar
-                  onSearch={handleSearch}
-                  disabled={
-                    !isAuthenticated ||
-                    (usage?.tier === "free" &&
-                      usage.remaining === 0 &&
-                      (usage.bonusSearches ?? 0) === 0)
-                  }
-                  autoFocus={isAuthenticated}
-                  compact
-                />
+            <div className="mt-8 flex w-full max-w-6xl flex-col gap-4">
+              <div className="crypto-card w-full p-4 sm:p-5">
+                <WalletGate authenticated={isAuthenticated} />
+                <div className={isAuthenticated ? "mt-4" : ""}>
+                  <SearchBar
+                    onSearch={handleSearch}
+                    disabled={
+                      !isAuthenticated ||
+                      (usage?.tier === "free" &&
+                        usage.remaining === 0 &&
+                        (usage.bonusSearches ?? 0) === 0)
+                    }
+                    autoFocus={isAuthenticated}
+                    compact
+                  />
+                </div>
               </div>
-            </div>
 
-            <FeaturedToken />
-            <RecentTokensList />
+              <FeaturedToken />
+              <RecentTokensList />
 
-            {usage?.tier === "free" &&
-              usage.remaining === 0 &&
-              isAuthenticated && (
-              <p className="mt-4 text-center text-sm text-accent-red">
+              {usage?.tier === "free" &&
+                usage.remaining === 0 &&
+                isAuthenticated && (
+                <p className="text-center text-sm text-accent-red">
                 Daily free limit reached.{" "}
                 <button
                   type="button"
@@ -170,30 +171,31 @@ export default function HomePage() {
                 >
                   Go Pro
                 </button>
-              </p>
-            )}
+                </p>
+              )}
 
-            <div className="mt-14 grid w-full max-w-6xl grid-cols-1 gap-3 xs:grid-cols-2 sm:grid-cols-3">
-              {FEATURES.map((feature) => (
-                <div key={feature.label} className={FEATURE_CARD_CLASS}>
-                  <div
-                    className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-xl border border-zen-border/80 text-xs font-bold ${feature.iconClass}`}
-                  >
-                    {feature.abbr}
+              <div className="grid w-full grid-cols-1 gap-3 xs:grid-cols-2 sm:grid-cols-3">
+                {FEATURES.map((feature) => (
+                  <div key={feature.label} className={FEATURE_CARD_CLASS}>
+                    <div
+                      className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-xl border border-zen-border/80 text-xs font-bold ${feature.iconClass}`}
+                    >
+                      {feature.abbr}
+                    </div>
+                    <div className="min-w-0 w-full">
+                      <p className="truncate text-sm font-medium text-white">
+                        {feature.label}
+                      </p>
+                      <p className="mt-0.5 text-[10px] leading-relaxed text-gray-600">
+                        {feature.desc}
+                      </p>
+                    </div>
                   </div>
-                  <div className="min-w-0 w-full">
-                    <p className="truncate text-sm font-medium text-white">
-                      {feature.label}
-                    </p>
-                    <p className="mt-0.5 text-[10px] leading-relaxed text-gray-600">
-                      {feature.desc}
-                    </p>
-                  </div>
-                </div>
-              ))}
+                ))}
+              </div>
+
+              <ComingSoonSection />
             </div>
-
-            <ComingSoonSection />
           </div>
         )}
       </main>

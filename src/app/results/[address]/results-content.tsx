@@ -199,7 +199,7 @@ export function ResultsContent() {
       addressBar={addressBar}
     >
       <main className="mx-auto w-full max-w-6xl flex-1 px-4 py-6 sm:px-6 sm:py-8">
-        <div className="mb-6 w-full space-y-6">
+        <div className="mb-6 w-full space-y-4">
           <div className="crypto-card w-full p-4 sm:p-5">
             <WalletGate authenticated={isAuthenticated} />
             <div className={isAuthenticated ? "mt-4" : ""}>
@@ -217,10 +217,8 @@ export function ResultsContent() {
             </div>
           </div>
 
-          {(entityType === "token" || token) && (
-            <FeaturedToken className="!mt-0" />
-          )}
-          <RecentTokensList className="!mt-0" />
+          {(entityType === "token" || token) && <FeaturedToken />}
+          <RecentTokensList />
         </div>
 
         {loading ? (
