@@ -7,6 +7,7 @@ import { ErrorState } from "@/components/ErrorState";
 import { LoadingState } from "@/components/LoadingState";
 import { RiskBreakdown } from "@/components/RiskBreakdown";
 import { RiskScore } from "@/components/RiskScore";
+import { RecentTokensList } from "@/components/RecentTokensList";
 import { SearchBar } from "@/components/SearchBar";
 import { TokenDetails } from "@/components/TokenDetails";
 import { TokenHeader } from "@/components/TokenHeader";
@@ -24,6 +25,7 @@ import {
   searchAddress,
 } from "@/lib/api-client";
 import { truncateAddress } from "@/lib/format";
+import { addRecentToken } from "@/lib/recent-tokens";
 import type {
   ApiError,
   EntityType,
@@ -58,6 +60,8 @@ export function ResultsContent() {
   const [wallet, setWallet] = useState<WalletDetailsType | null>(null);
   const [token, setToken] = useState<TokenDetailsType | null>(null);
   const requestIdRef = useRef(0);
+  const usageRef = useRef(usage);
+  usageRef.current = usage;
 
   const loadResults = useCallback(async () => {
     const requestId = ++requestIdRef.current;
@@ -65,6 +69,7 @@ export function ResultsContent() {
     setError(null);
 
     let type = typeParam;
+    let walletForRecent = usageRef.current?.wallet ?? null;
 
     if (!type) {
       const search = await searchAddress(address);
@@ -78,6 +83,7 @@ export function ResultsContent() {
       type = search.data.type;
       setEntityType(type);
       applyUsage(setUsage, search.usage);
+      if (search.usage?.wallet) walletForRecent = search.usage.wallet;
     }
 
     const riskResult = await fetchRisk(type, address);
@@ -90,6 +96,7 @@ export function ResultsContent() {
     }
 
     applyUsage(setUsage, riskResult.usage);
+    if (riskResult.usage?.wallet) walletForRecent = riskResult.usage.wallet;
     setRisk(riskResult.data);
     setEntityType(type);
 
@@ -107,13 +114,24 @@ export function ResultsContent() {
     }
 
     applyUsage(setUsage, detailsResult.usage);
+    if (detailsResult.usage?.wallet) walletForRecent = detailsResult.usage.wallet;
 
     if (type === "wallet") {
       setWallet(detailsResult.data as WalletDetailsType);
       setToken(null);
     } else {
-      setToken(detailsResult.data as TokenDetailsType);
+      const tokenData = detailsResult.data as TokenDetailsType;
+      setToken(tokenData);
       setWallet(null);
+      addRecentToken(
+        {
+          mint: tokenData.mint,
+          name: tokenData.name,
+          symbol: tokenData.symbol,
+          imageUrl: tokenData.imageUrl,
+        },
+        walletForRecent
+      );
     }
 
     setLoading(false);
@@ -188,6 +206,10 @@ export function ResultsContent() {
               (usage?.tier === "free" && usage.remaining === 0)
             }
             compact
+          />
+          <RecentTokensList
+            wallet={usage?.wallet}
+            authenticated={isAuthenticated}
           />
         </div>
 

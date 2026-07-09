@@ -5,6 +5,7 @@ import { useState } from "react";
 import { AppShell } from "@/components/AppShell";
 import { ErrorState } from "@/components/ErrorState";
 import { LoadingState } from "@/components/LoadingState";
+import { RecentTokensList } from "@/components/RecentTokensList";
 import { SearchBar } from "@/components/SearchBar";
 import { UpgradeModal } from "@/components/UpgradeModal";
 import { ComingSoonSection } from "@/components/ComingSoonSection";
@@ -124,6 +125,11 @@ export default function HomePage() {
                 />
               </div>
             </div>
+
+            <RecentTokensList
+              wallet={usage?.wallet}
+              authenticated={isAuthenticated}
+            />
 
             {usage?.tier === "free" && usage.remaining === 0 && isAuthenticated && (
               <p className="mt-4 text-center text-sm text-accent-red">
