@@ -48,22 +48,6 @@ export function ComingSoonTeaser({ item }: ComingSoonTeaserProps) {
 
 const TOKEN_COMING_SOON: ComingSoonTeaserItem[] = [
   {
-    phase: 5,
-    title: "Holder Distribution",
-    description:
-      "Top 10% concentration, Gini coefficient, whale count, and full supply breakdown.",
-    icon: "holders",
-    accent: "from-accent-yellow/25 to-accent-yellow/5",
-  },
-  {
-    phase: 6,
-    title: "Deployer Reputation",
-    description:
-      "Cross-token deployer history — spot repeat launchers and rug patterns before you buy.",
-    icon: "deployer",
-    accent: "from-solana-purple/25 to-solana-green/10",
-  },
-  {
     phase: 7,
     title: "Real-Time Alerts",
     description:

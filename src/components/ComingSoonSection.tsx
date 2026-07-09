@@ -52,7 +52,7 @@ const ROADMAP: RoadmapItem[] = [
     title: "Holder Analytics",
     description:
       "Full distribution breakdown — top 10% concentration, Gini coefficient, whale count, and supply metrics.",
-    status: "soon",
+    status: "live",
     accent: "from-accent-yellow/15 via-transparent to-transparent",
     icon: "holders",
   },
@@ -61,7 +61,7 @@ const ROADMAP: RoadmapItem[] = [
     title: "Deployer Reputation",
     description:
       "Cross-token deployer history. Track creators who repeatedly launch, rug, or build — before you ape in.",
-    status: "soon",
+    status: "live",
     accent: "from-zen-purple/20 via-transparent to-solana-green/5",
     icon: "deployer",
   },
@@ -193,9 +193,8 @@ export function ComingSoonSection() {
           <span className="gradient-text">Building with intention</span>
         </h2>
         <p className="mx-auto mt-3 max-w-md text-sm leading-relaxed text-gray-500">
-          Phases 1–{LIVE_COUNT} are live on {ZENERATING.name}. Holder analytics,
-          alerts, and AI intelligence are next — calm due diligence, not reckless
-          aping.
+          Phases 1–{LIVE_COUNT} are live on {ZENERATING.name}. Alerts,
+          watchlists, extension, and AI intelligence are next.
         </p>
 
         <div className="mx-auto mt-8 max-w-md">
@@ -218,7 +217,7 @@ export function ComingSoonSection() {
           </div>
           <p className="mt-2.5 text-[11px] text-gray-600">
             You are here{" "}
-            <span className="text-zen-purple">→ Phase 5 · Holder Analytics</span>
+            <span className="text-zen-purple">→ Phase 7 · Real-Time Alerts</span>
           </p>
         </div>
       </div>

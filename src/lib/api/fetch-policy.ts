@@ -2,8 +2,11 @@ import { peekCacheResult } from "@/lib/cache/peek-cache";
 import {
   getWalletData,
   getTokenData,
+  getTokenAnalytics,
   TOKEN_CACHE_KEY_PREFIX,
+  TOKEN_ANALYTICS_CACHE_PREFIX,
 } from "@/lib/data";
+import type { TokenAnalytics } from "@/lib/data/token-analytics-service";
 import type { TokenChainData, WalletChainData } from "@/lib/helius/index";
 import {
   assertCanSearch,
@@ -20,6 +23,10 @@ interface FetchResult<T> {
 }
 
 function targetAddressFromCacheKey(cacheKey: string): string {
+  if (cacheKey.startsWith(TOKEN_ANALYTICS_CACHE_PREFIX)) {
+    return cacheKey.slice(TOKEN_ANALYTICS_CACHE_PREFIX.length);
+  }
+
   if (cacheKey.startsWith(TOKEN_CACHE_KEY_PREFIX)) {
     return cacheKey.slice(TOKEN_CACHE_KEY_PREFIX.length);
   }
@@ -70,5 +77,16 @@ export async function fetchTokenWithPolicy(
 ): Promise<FetchResult<TokenChainData>> {
   return resolveWithRateLimit(`${TOKEN_CACHE_KEY_PREFIX}${mint}`, request, () =>
     getTokenData(mint)
+  );
+}
+
+export async function fetchTokenAnalyticsWithPolicy(
+  mint: string,
+  request: Request
+): Promise<FetchResult<TokenAnalytics>> {
+  return resolveWithRateLimit(
+    `${TOKEN_ANALYTICS_CACHE_PREFIX}${mint}`,
+    request,
+    () => getTokenAnalytics(mint)
   );
 }

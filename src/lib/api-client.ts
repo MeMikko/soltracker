@@ -1,4 +1,5 @@
 import type { ClusterGraph } from "@/lib/clustering/types";
+import type { TokenAnalytics } from "@/lib/data/token-analytics-service";
 import type {
   ApiError,
   RiskResponse,
@@ -100,6 +101,25 @@ export async function fetchWallet(
   const body = await parseJson<WalletDetails & { usage?: UsageResponse } & ApiError>(
     res
   );
+
+  if (!res.ok) {
+    return { ok: false, error: body, status: res.status };
+  }
+
+  const { data, usage } = extractUsage(body);
+  return { ok: true, data, usage };
+}
+
+export async function fetchTokenAnalytics(
+  mint: string
+): Promise<ApiSuccess<TokenAnalytics> | ApiFailure> {
+  const res = await fetch(
+    `/api/token/${encodeURIComponent(mint)}/analytics`,
+    fetchOptions
+  );
+  const body = await parseJson<
+    TokenAnalytics & { usage?: UsageResponse; source?: string } & ApiError
+  >(res);
 
   if (!res.ok) {
     return { ok: false, error: body, status: res.status };

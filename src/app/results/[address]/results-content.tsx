@@ -12,7 +12,7 @@ import { TokenDetails } from "@/components/TokenDetails";
 import { TokenHeader } from "@/components/TokenHeader";
 import { UpgradeModal } from "@/components/UpgradeModal";
 import { WalletClusterSection } from "@/components/clustering/WalletClusterSection";
-import { TokenComingSoonSections } from "@/components/teasers/ComingSoonTeaser";
+import { TokenIntelligenceSections } from "@/components/token/TokenIntelligenceSections";
 import { WalletDetails } from "@/components/WalletDetails";
 import { ZENERATING } from "@/lib/brand/zenerating";
 import { WalletGate } from "@/components/WalletGate";
@@ -254,7 +254,7 @@ export function ResultsContent() {
                 </div>
 
                 <div className="crypto-card p-4 sm:p-6">
-                  <TokenComingSoonSections />
+                  <TokenIntelligenceSections mint={address} />
                 </div>
               </>
             )}
