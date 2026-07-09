@@ -7,6 +7,7 @@ import { ErrorState } from "@/components/ErrorState";
 import { LoadingState } from "@/components/LoadingState";
 import { RiskBreakdown } from "@/components/RiskBreakdown";
 import { RiskScore } from "@/components/RiskScore";
+import { FeaturedToken } from "@/components/FeaturedToken";
 import { RecentTokensList } from "@/components/RecentTokensList";
 import { SearchBar } from "@/components/SearchBar";
 import { TokenDetails } from "@/components/TokenDetails";
@@ -180,18 +181,26 @@ export function ResultsContent() {
       addressBar={addressBar}
     >
       <main className="mx-auto w-full max-w-6xl flex-1 px-4 py-6 sm:px-6 sm:py-8">
-        <div className="crypto-card mx-auto mb-6 w-full max-w-4xl space-y-3 p-4 sm:p-5">
-          <WalletGate authenticated={isAuthenticated} />
-          <SearchBar
-            onSearch={handleSearch}
-            loading={loading}
-            disabled={
-              !isAuthenticated ||
-              (usage?.tier === "free" && usage.remaining === 0)
-            }
-            compact
-          />
-          <RecentTokensList />
+        <div className="mb-6 w-full space-y-6">
+          <div className="crypto-card w-full p-4 sm:p-5">
+            <WalletGate authenticated={isAuthenticated} />
+            <div className={isAuthenticated ? "mt-4" : ""}>
+              <SearchBar
+                onSearch={handleSearch}
+                loading={loading}
+                disabled={
+                  !isAuthenticated ||
+                  (usage?.tier === "free" && usage.remaining === 0)
+                }
+                compact
+              />
+            </div>
+          </div>
+
+          {(entityType === "token" || token) && (
+            <FeaturedToken className="!mt-0" />
+          )}
+          <RecentTokensList className="!mt-0" />
         </div>
 
         {loading ? (

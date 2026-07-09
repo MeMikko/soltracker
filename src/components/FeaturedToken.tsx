@@ -13,7 +13,11 @@ interface FeaturedTokenData {
   href: string;
 }
 
-export function FeaturedToken() {
+interface FeaturedTokenProps {
+  className?: string;
+}
+
+export function FeaturedToken({ className }: FeaturedTokenProps = {}) {
   const [token, setToken] = useState<FeaturedTokenData | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -58,7 +62,7 @@ export function FeaturedToken() {
   const label = token?.name ?? token?.symbol ?? truncateAddress(mint, 4);
 
   return (
-    <section className="relative mt-8 w-full max-w-4xl">
+    <section className={`relative mt-8 w-full max-w-6xl ${className ?? ""}`}>
       <div
         className="pointer-events-none absolute -inset-px rounded-2xl bg-gradient-to-r from-zen-cyan/50 via-zen-purple/40 to-zen-cyan/50 opacity-60 blur-[1px]"
         aria-hidden
