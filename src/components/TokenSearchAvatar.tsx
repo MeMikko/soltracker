@@ -7,7 +7,7 @@ interface TokenSearchAvatarProps {
   mint: string;
   imageUrl: string | null;
   name: string | null;
-  size?: "sm" | "md";
+  size?: "sm" | "md" | "lg";
 }
 
 export function TokenSearchAvatar({
@@ -20,7 +20,12 @@ export function TokenSearchAvatar({
   const [imgError, setImgError] = useState(false);
   const showImage = imageUrl && !imgError;
   const fallback = (symbol ?? name ?? mint).slice(0, 2).toUpperCase();
-  const sizeClass = size === "sm" ? "h-9 w-9 rounded-lg" : "h-12 w-12 rounded-xl";
+  const sizeClass =
+    size === "sm"
+      ? "h-9 w-9 rounded-lg text-xs"
+      : size === "lg"
+        ? "h-20 w-20 rounded-2xl text-sm"
+        : "h-12 w-12 rounded-xl text-xs";
 
   return (
     <div
@@ -35,7 +40,7 @@ export function TokenSearchAvatar({
           onError={() => setImgError(true)}
         />
       ) : (
-        <div className="flex h-full w-full items-center justify-center bg-zen-sage/15 text-xs font-bold text-zen-sage">
+        <div className="flex h-full w-full items-center justify-center bg-zen-sage/15 font-bold text-zen-sage">
           {fallback}
         </div>
       )}

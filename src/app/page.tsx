@@ -118,6 +118,8 @@ export default function HomePage() {
               {ZENERATING.subtagline}
             </p>
 
+            <FeaturedToken />
+
             <div className="crypto-card mt-8 w-full max-w-4xl p-4 sm:p-5">
               <WalletGate authenticated={isAuthenticated} />
               <div className={isAuthenticated ? "mt-4" : ""}>
@@ -132,8 +134,6 @@ export default function HomePage() {
                 />
               </div>
             </div>
-
-            <FeaturedToken />
             <RecentTokensList />
 
             {usage?.tier === "free" && usage.remaining === 0 && isAuthenticated && (
