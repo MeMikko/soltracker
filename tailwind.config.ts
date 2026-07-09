@@ -68,7 +68,7 @@ const config: Config = {
         shimmer: "shimmer 2s linear infinite",
         "zen-pulse": "zen-pulse 4s ease-in-out infinite",
         "zen-breathe": "zen-breathe 5s ease-in-out infinite",
-        "zen-spin-slow": "zen-spin 24s linear infinite",
+        "zen-spin-slow": "zen-spin 18s linear infinite",
         "zen-float": "zen-float 8s ease-in-out infinite",
         "zen-float-slow": "zen-float 12s ease-in-out infinite reverse",
       },
