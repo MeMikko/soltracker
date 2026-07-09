@@ -10,6 +10,12 @@ const billedSearches = new Map<string, number>();
 const ipWalletLinks = new Map<string, Set<string>>();
 const cacheEntries = new Map<string, MemoryCacheEntry>();
 const proExpiryByWallet = new Map<string, number>();
+const searchPackBalanceByWallet = new Map<string, number>();
+const tokenUnlockExpiryByKey = new Map<string, number>();
+
+function tokenUnlockKey(wallet: string, mintAddress: string): string {
+  return `${wallet}:${mintAddress}`;
+}
 
 function ipWalletKey(ip: string, date: string): string {
   return `${ip}:${date}`;
@@ -93,6 +99,44 @@ export function memoryGetProExpiry(wallet: string): number | null {
 
 export function memorySetProExpiry(wallet: string, expiresAtMs: number): void {
   proExpiryByWallet.set(wallet, expiresAtMs);
+}
+
+export function memoryGetSearchPackBalance(wallet: string): number {
+  return searchPackBalanceByWallet.get(wallet) ?? 0;
+}
+
+export function memoryAddSearchPackCredits(
+  wallet: string,
+  count: number
+): number {
+  const next = (searchPackBalanceByWallet.get(wallet) ?? 0) + count;
+  searchPackBalanceByWallet.set(wallet, next);
+  return next;
+}
+
+export function memoryConsumeSearchPackCredit(wallet: string): boolean {
+  const current = searchPackBalanceByWallet.get(wallet) ?? 0;
+  if (current <= 0) return false;
+  searchPackBalanceByWallet.set(wallet, current - 1);
+  return true;
+}
+
+export function memoryGetTokenUnlockExpiry(
+  wallet: string,
+  mintAddress: string
+): number | null {
+  return tokenUnlockExpiryByKey.get(tokenUnlockKey(wallet, mintAddress)) ?? null;
+}
+
+export function memorySetTokenUnlock(
+  wallet: string,
+  mintAddress: string,
+  expiresAtMs: number
+): void {
+  tokenUnlockExpiryByKey.set(
+    tokenUnlockKey(wallet, mintAddress),
+    expiresAtMs
+  );
 }
 
 export function memoryCacheSet<T>(

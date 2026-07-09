@@ -112,6 +112,38 @@ model WalletCluster {
   @@index([expiresAt])
 }
 
+/// Verified one-off purchases (search packs, per-token unlocks).
+model PurchasePayment {
+  id        String   @id @default(cuid())
+  wallet    String
+  signature String   @unique
+  product   String
+  lamports  BigInt
+  paidAt    DateTime @default(now())
+  metadata  Json?
+
+  @@index([wallet])
+}
+
+/// Bonus searches bought in packs — consumed after the daily free quota.
+model SearchPackBalance {
+  wallet    String   @id
+  remaining Int      @default(0)
+  updatedAt DateTime @updatedAt
+}
+
+/// Pro intelligence unlocked for a single token mint.
+model TokenUnlock {
+  id            String   @id @default(cuid())
+  wallet        String
+  mintAddress   String
+  unlockedUntil DateTime
+
+  @@unique([wallet, mintAddress])
+  @@index([wallet])
+  @@index([mintAddress])
+}
+
 /// Globally tracked token searches — one row per mint, deduplicated on the homepage.
 model TokenSearchStat {
   mintAddress    String   @id

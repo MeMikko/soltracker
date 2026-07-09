@@ -12,12 +12,16 @@ import { RecentTokensList } from "@/components/RecentTokensList";
 import { SearchBar } from "@/components/SearchBar";
 import { TokenDetails } from "@/components/TokenDetails";
 import { TokenHeader } from "@/components/TokenHeader";
-import { UpgradeModal } from "@/components/UpgradeModal";
+import {
+  UpgradeModal,
+  type PurchaseFocus,
+} from "@/components/UpgradeModal";
 import { WalletClusterSection } from "@/components/clustering/WalletClusterSection";
 import { TokenIntelligenceSections } from "@/components/token/TokenIntelligenceSections";
 import { WalletDetails } from "@/components/WalletDetails";
 import { ZENERATING } from "@/lib/brand/zenerating";
 import { WalletGate } from "@/components/WalletGate";
+import { useTokenUnlock } from "@/hooks/useTokenUnlock";
 import { useUsage } from "@/hooks/useUsage";
 import {
   fetchRisk,
@@ -56,6 +60,7 @@ export function ResultsContent() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<ApiError | null>(null);
   const [upgradeOpen, setUpgradeOpen] = useState(false);
+  const [purchaseFocus, setPurchaseFocus] = useState<PurchaseFocus>("pro");
   const [entityType, setEntityType] = useState<EntityType | null>(typeParam);
   const [risk, setRisk] = useState<RiskResponse | null>(null);
   const [wallet, setWallet] = useState<WalletDetailsType | null>(null);
@@ -129,14 +134,27 @@ export function ResultsContent() {
 
   const isAuthenticated = usage?.authenticated ?? false;
   const isPro = usage?.tier === "pro" || usage?.tier === "admin";
+  const tokenMint = token?.mint ?? (entityType === "token" ? address : null);
+  const { unlocked: tokenUnlocked, refresh: refreshTokenUnlock } =
+    useTokenUnlock(tokenMint);
+  const hasTokenAccess = isPro || tokenUnlocked;
+
+  function openPurchase(focus: PurchaseFocus) {
+    setPurchaseFocus(focus);
+    setUpgradeOpen(true);
+  }
 
   async function handleSearch(newAddress: string) {
     if (!isAuthenticated) {
       return;
     }
 
-    if (usage?.tier === "free" && usage.remaining === 0) {
-      setUpgradeOpen(true);
+    if (
+      usage?.tier === "free" &&
+      usage.remaining === 0 &&
+      (usage.bonusSearches ?? 0) === 0
+    ) {
+      openPurchase("search_pack");
       return;
     }
 
@@ -177,7 +195,7 @@ export function ResultsContent() {
   return (
     <AppShell
       usage={usage}
-      onUpgradeClick={() => setUpgradeOpen(true)}
+      onUpgradeClick={() => openPurchase("search_pack")}
       addressBar={addressBar}
     >
       <main className="mx-auto w-full max-w-6xl flex-1 px-4 py-6 sm:px-6 sm:py-8">
@@ -190,7 +208,9 @@ export function ResultsContent() {
                 loading={loading}
                 disabled={
                   !isAuthenticated ||
-                  (usage?.tier === "free" && usage.remaining === 0)
+                  (usage?.tier === "free" &&
+                usage.remaining === 0 &&
+                (usage.bonusSearches ?? 0) === 0)
                 }
                 compact
               />
@@ -209,7 +229,7 @@ export function ResultsContent() {
           <ErrorState
             error={error}
             onRetry={loadResults}
-            onUpgrade={() => setUpgradeOpen(true)}
+            onUpgrade={() => openPurchase("search_pack")}
           />
         ) : risk ? (
           <div className="space-y-6 lg:space-y-8">
@@ -246,8 +266,8 @@ export function ResultsContent() {
                 <WalletClusterSection
                   address={address}
                   context="wallet"
-                  isPro={isPro}
-                  onUpgrade={() => setUpgradeOpen(true)}
+                  isPro={hasTokenAccess}
+                  onUpgrade={() => openPurchase("pro")}
                 />
               </div>
             )}
@@ -260,16 +280,18 @@ export function ResultsContent() {
                     context="token_creator"
                     creatorAddress={token.creator}
                     tokenSymbol={token.symbol}
-                    isPro={isPro}
-                    onUpgrade={() => setUpgradeOpen(true)}
+                    isPro={hasTokenAccess}
+                    onUpgrade={() => openPurchase("pro")}
+                    onUnlockToken={() => openPurchase("token_unlock")}
                   />
                 </div>
 
                 <div className="crypto-card p-4 sm:p-6">
                   <TokenIntelligenceSections
                     mint={address}
-                    isPro={isPro}
-                    onUpgrade={() => setUpgradeOpen(true)}
+                    isPro={hasTokenAccess}
+                    onUpgrade={() => openPurchase("pro")}
+                    onUnlockToken={() => openPurchase("token_unlock")}
                   />
                 </div>
               </>
@@ -278,7 +300,13 @@ export function ResultsContent() {
         ) : null}
       </main>
 
-      <UpgradeModal open={upgradeOpen} onClose={() => setUpgradeOpen(false)} />
+      <UpgradeModal
+        open={upgradeOpen}
+        onClose={() => setUpgradeOpen(false)}
+        focus={purchaseFocus}
+        unlockMint={tokenMint}
+        onPurchaseComplete={() => void refreshTokenUnlock()}
+      />
     </AppShell>
   );
 }

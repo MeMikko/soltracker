@@ -13,6 +13,7 @@ interface TokenIntelligenceSectionsProps {
   mint: string;
   isPro: boolean;
   onUpgrade: () => void;
+  onUnlockToken?: () => void;
 }
 
 function AnalyticsPreview() {
@@ -52,6 +53,7 @@ export function TokenIntelligenceSections({
   mint,
   isPro,
   onUpgrade,
+  onUnlockToken,
 }: TokenIntelligenceSectionsProps) {
   const [analytics, setAnalytics] = useState<TokenAnalytics | null>(null);
   const [loading, setLoading] = useState(isPro);
@@ -95,16 +97,18 @@ export function TokenIntelligenceSections({
       <div className="space-y-8">
         <ProLockedOverlay
           onUpgrade={onUpgrade}
+          onUnlockToken={onUnlockToken}
           title="Holder Analytics"
-          description="Top holder concentration, Gini coefficient, and whale exposure — Pro only."
+          description="Top holder concentration, Gini coefficient, and whale exposure — Pro or per-token unlock."
         >
           <AnalyticsPreview />
         </ProLockedOverlay>
 
         <ProLockedOverlay
           onUpgrade={onUpgrade}
+          onUnlockToken={onUnlockToken}
           title="Deployer Reputation"
-          description="Cross-token deploy history and rug-risk signals — Pro only."
+          description="Cross-token deploy history and rug-risk signals — Pro or per-token unlock."
         >
           <DeployerPreview />
         </ProLockedOverlay>

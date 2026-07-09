@@ -16,6 +16,7 @@ interface WalletClusterSectionProps {
   tokenSymbol?: string | null;
   isPro?: boolean;
   onUpgrade?: () => void;
+  onUnlockToken?: () => void;
 }
 
 export function WalletClusterSection({
@@ -25,6 +26,7 @@ export function WalletClusterSection({
   tokenSymbol,
   isPro = false,
   onUpgrade,
+  onUnlockToken,
 }: WalletClusterSectionProps) {
   const [graph, setGraph] = useState<ClusterGraph | null>(null);
   const [loading, setLoading] = useState(true);
@@ -138,8 +140,9 @@ export function WalletClusterSection({
       {!isPro && onUpgrade ? (
         <ProLockedOverlay
           onUpgrade={onUpgrade}
+          onUnlockToken={isTokenCreator ? onUnlockToken : undefined}
           title="Clustering is Pro"
-          description="Creator funding networks and wallet clusters unlock with Pro (Phase 4+)."
+          description="Creator funding networks and wallet clusters unlock with Pro (Phase 4+) or a per-token unlock."
         >
           <ClusterPreviewPlaceholder />
         </ProLockedOverlay>

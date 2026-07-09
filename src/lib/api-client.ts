@@ -6,6 +6,7 @@ import type {
   RiskResponse,
   SearchResponse,
   TokenDetails,
+  TokenUnlockStatus,
   UsageResponse,
   WalletDetails,
 } from "./types";
@@ -69,6 +70,66 @@ export async function fetchUsage(): Promise<UsageResponse> {
 export interface ProActivationResult {
   pro: { active: boolean; expiresAt: string | null };
   usage: UsageResponse;
+}
+
+export async function activateSearchPackPayment(
+  signature: string
+): Promise<ApiSuccess<{ purchase: { bonusSearches: number }; usage: UsageResponse }> | ApiFailure> {
+  const res = await fetch("/api/purchases/search-pack", {
+    method: "POST",
+    credentials: "include",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ signature }),
+  });
+
+  const body = await parseJson<
+    { purchase: { bonusSearches: number }; usage: UsageResponse } & ApiError
+  >(res);
+
+  if (!res.ok) {
+    return { ok: false, error: body, status: res.status };
+  }
+
+  return { ok: true, data: body, usage: body.usage };
+}
+
+export async function activateTokenUnlockPayment(
+  signature: string,
+  mint: string
+): Promise<
+  ApiSuccess<{ unlock: TokenUnlockStatus; usage: UsageResponse }> | ApiFailure
+> {
+  const res = await fetch("/api/purchases/token-unlock", {
+    method: "POST",
+    credentials: "include",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ signature, mint }),
+  });
+
+  const body = await parseJson<
+    { unlock: TokenUnlockStatus; usage: UsageResponse } & ApiError
+  >(res);
+
+  if (!res.ok) {
+    return { ok: false, error: body, status: res.status };
+  }
+
+  return { ok: true, data: body, usage: body.usage };
+}
+
+export async function fetchTokenUnlockStatus(
+  mint: string
+): Promise<TokenUnlockStatus> {
+  const res = await fetch(
+    `/api/purchases/token-unlock/status?mint=${encodeURIComponent(mint)}`,
+    fetchOptions
+  );
+
+  if (!res.ok) {
+    return { unlocked: false, expiresAt: null, via: null };
+  }
+
+  return parseJson<TokenUnlockStatus>(res);
 }
 
 export async function activateProPayment(

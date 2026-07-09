@@ -203,8 +203,9 @@ async function broadcastSignedTransaction(
   return body.signature;
 }
 
-export async function buildProPaymentTransaction(
-  sessionWallet: string
+export async function buildTreasuryPaymentTransaction(
+  sessionWallet: string,
+  lamports: number
 ): Promise<Transaction> {
   const blockhash = await fetchBlockhash();
   const fromPubkey = new PublicKey(sessionWallet);
@@ -212,12 +213,18 @@ export async function buildProPaymentTransaction(
     SystemProgram.transfer({
       fromPubkey,
       toPubkey: new PublicKey(PRO_TREASURY_WALLET),
-      lamports: PRO_PRICE_LAMPORTS,
+      lamports,
     })
   );
   transaction.recentBlockhash = blockhash;
   transaction.feePayer = fromPubkey;
   return transaction;
+}
+
+export async function buildProPaymentTransaction(
+  sessionWallet: string
+): Promise<Transaction> {
+  return buildTreasuryPaymentTransaction(sessionWallet, PRO_PRICE_LAMPORTS);
 }
 
 function solanaAccount(account: WalletAccount): boolean {
@@ -435,12 +442,17 @@ export async function preparePaymentWallet(
   );
 }
 
-export async function sendProSubscriptionPayment(
-  sessionWallet: string
+export async function sendTreasuryPayment(
+  sessionWallet: string,
+  lamports: number,
+  amountLabel: string
 ): Promise<string> {
   await preparePaymentWallet(sessionWallet);
 
-  const transaction = await buildProPaymentTransaction(sessionWallet);
+  const transaction = await buildTreasuryPaymentTransaction(
+    sessionWallet,
+    lamports
+  );
 
   const storedId = getStoredWalletAdapterId();
   const storedName = getStoredWalletName();
@@ -462,6 +474,16 @@ export async function sendProSubscriptionPayment(
 
   const walletLabel = storedName ?? "wallet";
   throw new Error(
-    `Payment was not approved. Approve the 0.1 SOL transfer in ${walletLabel} and try again.`
+    `Payment was not approved. Approve the ${amountLabel} transfer in ${walletLabel} and try again.`
+  );
+}
+
+export async function sendProSubscriptionPayment(
+  sessionWallet: string
+): Promise<string> {
+  return sendTreasuryPayment(
+    sessionWallet,
+    PRO_PRICE_LAMPORTS,
+    `${PRO_PRICE_LAMPORTS / 1e9} SOL`
   );
 }

@@ -8,7 +8,10 @@ import { LoadingState } from "@/components/LoadingState";
 import { FeaturedToken } from "@/components/FeaturedToken";
 import { RecentTokensList } from "@/components/RecentTokensList";
 import { SearchBar } from "@/components/SearchBar";
-import { UpgradeModal } from "@/components/UpgradeModal";
+import {
+  UpgradeModal,
+  type PurchaseFocus,
+} from "@/components/UpgradeModal";
 import { ComingSoonSection } from "@/components/ComingSoonSection";
 import { WalletGate } from "@/components/WalletGate";
 import { ZenLogo } from "@/components/ZenLogo";
@@ -47,6 +50,12 @@ export default function HomePage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<ApiError | null>(null);
   const [upgradeOpen, setUpgradeOpen] = useState(false);
+  const [purchaseFocus, setPurchaseFocus] = useState<PurchaseFocus>("pro");
+
+  function openPurchase(focus: PurchaseFocus) {
+    setPurchaseFocus(focus);
+    setUpgradeOpen(true);
+  }
 
   const isAuthenticated = usage?.authenticated ?? false;
 
@@ -55,8 +64,11 @@ export default function HomePage() {
       return;
     }
 
-    if (usage?.remaining === 0) {
-      setUpgradeOpen(true);
+    if (
+      usage?.remaining === 0 &&
+      (usage.bonusSearches ?? 0) === 0
+    ) {
+      openPurchase("search_pack");
       return;
     }
 
@@ -81,7 +93,7 @@ export default function HomePage() {
   }
 
   return (
-    <AppShell usage={usage} onUpgradeClick={() => setUpgradeOpen(true)}>
+    <AppShell usage={usage} onUpgradeClick={() => openPurchase("pro")}>
       <main className="mx-auto flex w-full max-w-6xl flex-1 flex-col px-4 pb-16 pt-8 sm:px-6 sm:pt-12 lg:pt-16">
         {loading ? (
           <LoadingState message="Resolving address on-chain…" />
@@ -90,7 +102,7 @@ export default function HomePage() {
             <ErrorState
               error={error}
               onRetry={() => setError(null)}
-              onUpgrade={() => setUpgradeOpen(true)}
+              onUpgrade={() => openPurchase("search_pack")}
             />
             <div className="mt-8">
               <SearchBar
@@ -125,7 +137,9 @@ export default function HomePage() {
                   onSearch={handleSearch}
                   disabled={
                     !isAuthenticated ||
-                    (usage?.tier === "free" && usage.remaining === 0)
+                    (usage?.tier === "free" &&
+                      usage.remaining === 0 &&
+                      (usage.bonusSearches ?? 0) === 0)
                   }
                   autoFocus={isAuthenticated}
                   compact
@@ -136,15 +150,25 @@ export default function HomePage() {
             <FeaturedToken />
             <RecentTokensList />
 
-            {usage?.tier === "free" && usage.remaining === 0 && isAuthenticated && (
+            {usage?.tier === "free" &&
+              usage.remaining === 0 &&
+              isAuthenticated && (
               <p className="mt-4 text-center text-sm text-accent-red">
                 Daily free limit reached.{" "}
                 <button
                   type="button"
-                  onClick={() => setUpgradeOpen(true)}
+                  onClick={() => openPurchase("search_pack")}
                   className="font-medium text-zen-cyan hover:underline"
                 >
-                  Upgrade to Pro
+                  Buy extra searches
+                </button>
+                {" · "}
+                <button
+                  type="button"
+                  onClick={() => openPurchase("pro")}
+                  className="font-medium text-zen-cyan hover:underline"
+                >
+                  Go Pro
                 </button>
               </p>
             )}
@@ -178,7 +202,11 @@ export default function HomePage() {
         {ZENERATING.name} · Helius · Cached 12 min · Not financial advice
       </footer>
 
-      <UpgradeModal open={upgradeOpen} onClose={() => setUpgradeOpen(false)} />
+      <UpgradeModal
+        open={upgradeOpen}
+        onClose={() => setUpgradeOpen(false)}
+        focus={purchaseFocus}
+      />
     </AppShell>
   );
 }

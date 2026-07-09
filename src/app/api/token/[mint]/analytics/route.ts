@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { handleApiError } from "@/lib/api/handle-error";
 import { fetchTokenAnalyticsWithPolicy } from "@/lib/api/fetch-policy";
-import { assertProAccess } from "@/lib/pro/access";
+import { assertProOrTokenUnlock } from "@/lib/pro/access";
 import { parseSolanaAddress } from "@/lib/validation";
 
 export const maxDuration = 60;
@@ -13,7 +13,7 @@ export async function GET(
   try {
     const { mint: raw } = await params;
     const mint = parseSolanaAddress(decodeURIComponent(raw));
-    await assertProAccess(request);
+    await assertProOrTokenUnlock(request, mint);
     const result = await fetchTokenAnalyticsWithPolicy(mint, request);
 
     return NextResponse.json({

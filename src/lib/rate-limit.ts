@@ -13,6 +13,7 @@ import {
 } from "@/lib/dev/memory-store";
 import { prisma } from "@/lib/db";
 import { withDbFallback } from "@/lib/db-safe";
+import { getSearchPackBalance } from "@/lib/payments/search-pack-service";
 import { isProActive, getProStatus } from "@/lib/pro/subscription-service";
 import type { UsageResponse } from "@/lib/types";
 
@@ -97,10 +98,13 @@ async function buildUsage(
     return buildUnlimitedUsage(wallet, "pro", pro.expiresAt);
   }
 
+  const bonusSearches = wallet ? await getSearchPackBalance(wallet) : 0;
+
   return {
     used,
     limit: FREE_DAILY_LIMIT,
     remaining: Math.max(0, FREE_DAILY_LIMIT - used),
+    bonusSearches,
     tier: "free",
     wallet,
     authenticated: wallet !== null || isWalletAuthDisabled(),
@@ -242,13 +246,24 @@ export async function consumeSearch(
   }
 
   const identifier = getRequestIdentifier(request);
+  const date = todayKey();
+  const used = await getSearchCount(identifier, date);
 
-  const current = await getSearchUsage(request);
-  if (current.remaining === 0) {
-    return current;
+  if (used < FREE_DAILY_LIMIT) {
+    const nextUsed = await incrementSearchCount(identifier, date);
+    return buildUsage(nextUsed, wallet);
   }
 
-  const used = await incrementSearchCount(identifier, todayKey());
+  if (wallet) {
+    const { consumeSearchPackCredit } = await import(
+      "@/lib/payments/search-pack-service"
+    );
+    const consumed = await consumeSearchPackCredit(wallet);
+    if (consumed) {
+      return buildUsage(used, wallet);
+    }
+  }
+
   return buildUsage(used, wallet);
 }
 
@@ -256,7 +271,10 @@ export function canSearch(usage: UsageResponse): boolean {
   if (usage.tier === "admin" || usage.tier === "pro") {
     return usage.authenticated;
   }
-  return usage.authenticated && usage.remaining > 0;
+  return (
+    usage.authenticated &&
+    (usage.remaining > 0 || (usage.bonusSearches ?? 0) > 0)
+  );
 }
 
 export class RateLimitExceededError extends Error {

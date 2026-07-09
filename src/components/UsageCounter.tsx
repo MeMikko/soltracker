@@ -48,14 +48,16 @@ export function UsageCounter({ usage, onUpgradeClick }: UsageCounterProps) {
     );
   }
 
-  const atLimit = usage.remaining === 0;
+  const bonus = usage.bonusSearches ?? 0;
+  const atDailyLimit = usage.remaining === 0;
+  const canSearch = usage.remaining > 0 || bonus > 0;
   const pct = Math.round((usage.remaining / usage.limit) * 100);
 
   return (
     <div className="flex items-center gap-2 sm:gap-3">
       <div
         className={`flex items-center gap-2 rounded-full border px-3 py-1.5 text-xs sm:text-sm ${
-          atLimit
+          !canSearch
             ? "border-accent-red/30 bg-accent-red/10 text-accent-red"
             : "border-surface-border bg-surface-raised/80 text-gray-400"
         }`}
@@ -63,13 +65,14 @@ export function UsageCounter({ usage, onUpgradeClick }: UsageCounterProps) {
       >
         <span
           className={`h-1.5 w-1.5 shrink-0 rounded-full ${
-            atLimit ? "bg-accent-red" : "bg-solana-green animate-pulse-glow"
+            !canSearch ? "bg-accent-red" : "bg-solana-green animate-pulse-glow"
           }`}
         />
         <span className="whitespace-nowrap">
-          {usage.remaining}/{usage.limit} searches
+          {usage.remaining}/{usage.limit} daily
+          {bonus > 0 ? ` · +${bonus} bonus` : ""}
         </span>
-        {!atLimit && (
+        {usage.remaining > 0 && (
           <span className="hidden text-gray-600 sm:inline">
             · {pct}% left
           </span>
@@ -80,10 +83,12 @@ export function UsageCounter({ usage, onUpgradeClick }: UsageCounterProps) {
           type="button"
           onClick={onUpgradeClick}
           className={`shrink-0 px-3 py-1.5 text-xs ${
-            atLimit ? "btn-primary" : "btn-ghost border-zen-sage/25 text-zen-sage"
+            atDailyLimit && bonus === 0
+              ? "btn-primary"
+              : "btn-ghost border-zen-sage/25 text-zen-sage"
           }`}
         >
-          {atLimit ? "Upgrade" : "Go Pro"}
+          {atDailyLimit && bonus === 0 ? "Buy searches" : "Go Pro"}
         </button>
       )}
     </div>

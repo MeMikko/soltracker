@@ -113,17 +113,8 @@ export async function activateProFromPayment(
 export async function isPaymentSignatureUsed(
   signature: string
 ): Promise<boolean> {
-  if (!hasDatabase()) return false;
-
-  const row = await withDbFallback(
-    async () =>
-      prisma.proPayment.findUnique({
-        where: { signature },
-        select: { id: true },
-      }),
-    null,
-    `pro payment lookup (${signature})`
+  const { isPurchaseSignatureUsed } = await import(
+    "@/lib/payments/purchase-ledger"
   );
-
-  return row !== null;
+  return isPurchaseSignatureUsed(signature);
 }

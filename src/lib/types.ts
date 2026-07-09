@@ -77,10 +77,17 @@ export interface UsageResponse {
   used: number;
   limit: number;
   remaining: number;
+  bonusSearches?: number;
   tier: "free" | "pro" | "admin";
   wallet: string | null;
   authenticated: boolean;
   proExpiresAt?: string | null;
+}
+
+export interface TokenUnlockStatus {
+  unlocked: boolean;
+  expiresAt: string | null;
+  via?: "pro" | "token_unlock" | null;
 }
 
 export interface AuthSession {

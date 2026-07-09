@@ -1,10 +1,12 @@
 "use client";
 
 import type { ReactNode } from "react";
+import { TOKEN_UNLOCK_PRICE_SOL } from "@/lib/payments/config";
 
 interface ProLockedOverlayProps {
   children: ReactNode;
   onUpgrade: () => void;
+  onUnlockToken?: () => void;
   title?: string;
   description?: string;
 }
@@ -12,6 +14,7 @@ interface ProLockedOverlayProps {
 export function ProLockedOverlay({
   children,
   onUpgrade,
+  onUnlockToken,
   title = "Pro feature",
   description = "Upgrade to unlock wallet and token clustering.",
 }: ProLockedOverlayProps) {
@@ -23,9 +26,20 @@ export function ProLockedOverlay({
         <p className="max-w-xs text-xs leading-relaxed text-gray-500">
           {description}
         </p>
-        <button type="button" onClick={onUpgrade} className="btn-primary px-4 py-2 text-xs">
-          Upgrade to Pro
-        </button>
+        <div className="flex flex-col gap-2 sm:flex-row">
+          {onUnlockToken && (
+            <button
+              type="button"
+              onClick={onUnlockToken}
+              className="btn-primary px-4 py-2 text-xs"
+            >
+              Unlock token · {TOKEN_UNLOCK_PRICE_SOL} SOL
+            </button>
+          )}
+          <button type="button" onClick={onUpgrade} className="btn-ghost px-4 py-2 text-xs">
+            Get Pro
+          </button>
+        </div>
       </div>
     </div>
   );
