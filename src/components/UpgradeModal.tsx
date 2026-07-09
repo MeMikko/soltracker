@@ -20,9 +20,9 @@ interface UpgradeModalProps {
 
 const FEATURES = [
   "Unlimited daily searches",
-  "Full wallet & token clustering",
-  "Priority indexing as features ship",
-  "Renew monthly — cancel anytime",
+  "Wallet & token clustering (Phase 4)",
+  "Holder analytics & deployer reputation",
+  "All future phases as they ship",
 ];
 
 function sleep(ms: number): Promise<void> {

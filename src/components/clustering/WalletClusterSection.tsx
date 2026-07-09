@@ -136,7 +136,11 @@ export function WalletClusterSection({
       </div>
 
       {!isPro && onUpgrade ? (
-        <ProLockedOverlay onUpgrade={onUpgrade} title="Clustering is Pro">
+        <ProLockedOverlay
+          onUpgrade={onUpgrade}
+          title="Clustering is Pro"
+          description="Creator funding networks and wallet clusters unlock with Pro (Phase 4+)."
+        >
           <ClusterPreviewPlaceholder />
         </ProLockedOverlay>
       ) : loading ? (

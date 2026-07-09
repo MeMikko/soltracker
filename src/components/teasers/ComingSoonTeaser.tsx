@@ -1,4 +1,5 @@
 import { ZENERATING } from "@/lib/brand/zenerating";
+import { ProLockedOverlay } from "../ProLockedOverlay";
 import { TeaserVisual, type TeaserIcon } from "./TeaserVisual";
 
 export interface ComingSoonTeaserItem {
@@ -65,8 +66,16 @@ const TOKEN_COMING_SOON: ComingSoonTeaserItem[] = [
   },
 ];
 
-export function TokenComingSoonSections() {
-  return (
+interface TokenComingSoonSectionsProps {
+  isPro: boolean;
+  onUpgrade: () => void;
+}
+
+export function TokenComingSoonSections({
+  isPro,
+  onUpgrade,
+}: TokenComingSoonSectionsProps) {
+  const content = (
     <section className="space-y-4">
       <div>
         <p className="text-[10px] font-semibold uppercase tracking-[0.25em] text-zen-sage">
@@ -88,4 +97,18 @@ export function TokenComingSoonSections() {
       </div>
     </section>
   );
+
+  if (!isPro) {
+    return (
+      <ProLockedOverlay
+        onUpgrade={onUpgrade}
+        title="Upcoming Pro modules"
+        description="Alerts, watchlists, extension, and AI summaries require Pro."
+      >
+        {content}
+      </ProLockedOverlay>
+    );
+  }
+
+  return content;
 }

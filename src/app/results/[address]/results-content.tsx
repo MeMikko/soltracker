@@ -254,7 +254,11 @@ export function ResultsContent() {
                 </div>
 
                 <div className="crypto-card p-4 sm:p-6">
-                  <TokenIntelligenceSections mint={address} />
+                  <TokenIntelligenceSections
+                    mint={address}
+                    isPro={isPro}
+                    onUpgrade={() => setUpgradeOpen(true)}
+                  />
                 </div>
               </>
             )}

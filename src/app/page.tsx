@@ -18,17 +18,17 @@ import type { ApiError } from "@/lib/types";
 const FEATURES = [
   {
     label: "Risk Scoring",
-    desc: "0–100 safety score with factor breakdown",
+    desc: "Free · 0–100 score with factor breakdown",
     accent: "from-zen-cyan/20 to-transparent",
   },
   {
-    label: "Token Analysis",
-    desc: "LP, holders, mint authority & more",
+    label: "Token & Wallet",
+    desc: "Free · LP, mint authority, balance & activity",
     accent: "from-zen-purple/20 to-transparent",
   },
   {
-    label: "Wallet Intel",
-    desc: "Age, balance, activity & tx history",
+    label: "Pro Intelligence",
+    desc: "Clustering, holder analytics & deployer history",
     accent: "from-zen-sage/25 to-transparent",
   },
 ];
