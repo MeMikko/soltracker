@@ -4,8 +4,10 @@ import { peekCacheResult } from "@/lib/cache/peek-cache";
 import {
   getTokenData,
   getWalletData,
+  recordTokenSearch,
   TOKEN_CACHE_KEY_PREFIX,
 } from "@/lib/data";
+import type { TokenChainData } from "@/lib/helius/index";
 import { detectEntityType, hasHeliusApiKey } from "@/lib/helius/index";
 import { mockEntityType } from "@/lib/mock-data";
 import {
@@ -18,6 +20,21 @@ import { parseSolanaAddress } from "@/lib/validation";
 
 export const maxDuration = 30;
 
+async function recordSearchIfToken(
+  address: string,
+  type: EntityType,
+  tokenData?: TokenChainData
+): Promise<void> {
+  if (type !== "token") return;
+
+  await recordTokenSearch({
+    mint: address,
+    name: tokenData?.name ?? null,
+    symbol: tokenData?.symbol ?? null,
+    imageUrl: tokenData?.imageUrl ?? null,
+  });
+}
+
 export async function GET(
   request: Request,
   { params }: { params: Promise<{ address: string }> }
@@ -27,7 +44,9 @@ export async function GET(
     const address = parseSolanaAddress(decodeURIComponent(raw));
 
     const walletCached = await peekCacheResult(`wallet:${address}`);
-    const tokenCached = await peekCacheResult(`${TOKEN_CACHE_KEY_PREFIX}${address}`);
+    const tokenCached = await peekCacheResult<TokenChainData>(
+      `${TOKEN_CACHE_KEY_PREFIX}${address}`
+    );
 
     let type: EntityType;
     let usage = await getSearchUsage(request);
@@ -36,6 +55,7 @@ export async function GET(
       type = "wallet";
     } else if (tokenCached) {
       type = "token";
+      await recordSearchIfToken(address, type, tokenCached.data);
     } else {
       await assertCanSearch(request);
       type = hasHeliusApiKey()
@@ -51,6 +71,14 @@ export async function GET(
         dataResult.source === "live"
           ? await consumeSearchForAddress(request, address)
           : await getSearchUsage(request);
+
+      if (type === "token") {
+        await recordSearchIfToken(
+          address,
+          type,
+          dataResult.data as TokenChainData
+        );
+      }
     }
 
     const body: SearchResponse & { usage: typeof usage } = {

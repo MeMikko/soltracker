@@ -18,7 +18,7 @@ export async function GET(
     const result = await fetchTokenWithPolicy(mint, request);
     const details = toTokenDetails(result.data);
 
-    void recordTokenSearch({
+    await recordTokenSearch({
       mint: details.mint,
       name: details.name,
       symbol: details.symbol,
