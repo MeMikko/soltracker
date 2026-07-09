@@ -9,32 +9,61 @@
 body {
   @apply bg-zen-deep font-sans text-gray-100 antialiased;
   background-image:
-    radial-gradient(ellipse 70% 45% at 50% -10%, rgba(125, 155, 138, 0.14), transparent),
-    radial-gradient(ellipse 50% 30% at 100% 0%, rgba(168, 181, 196, 0.06), transparent),
-    linear-gradient(rgba(255, 255, 255, 0.012) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255, 255, 255, 0.012) 1px, transparent 1px);
-  background-size: 100% 100%, 100% 100%, 40px 40px, 40px 40px;
+    radial-gradient(ellipse 80% 50% at 50% -20%, rgba(34, 211, 238, 0.08), transparent),
+    radial-gradient(ellipse 60% 40% at 100% 0%, rgba(139, 92, 246, 0.06), transparent),
+    radial-gradient(ellipse 50% 30% at 0% 50%, rgba(125, 155, 138, 0.05), transparent),
+    linear-gradient(rgba(255, 255, 255, 0.01) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.01) 1px, transparent 1px);
+  background-size: 100% 100%, 100% 100%, 100% 100%, 48px 48px, 48px 48px;
   background-attachment: fixed;
 }
 
 @layer components {
+  .zen-orb {
+    @apply absolute rounded-full blur-3xl;
+    animation: zen-float 10s ease-in-out infinite;
+  }
+
+  .zen-orb-cyan {
+    background: radial-gradient(circle, rgba(34, 211, 238, 0.18) 0%, transparent 70%);
+  }
+
+  .zen-orb-purple {
+    background: radial-gradient(circle, rgba(139, 92, 246, 0.16) 0%, transparent 70%);
+    animation-duration: 14s;
+    animation-direction: reverse;
+  }
+
+  .zen-orb-sage {
+    background: radial-gradient(circle, rgba(125, 155, 138, 0.12) 0%, transparent 70%);
+    animation-duration: 18s;
+  }
+
   .crypto-card {
-    @apply rounded-xl border border-zen-border bg-zen-card shadow-zen shadow-inner-glow;
+    @apply rounded-2xl border border-zen-border/80 bg-zen-card/90 shadow-zen backdrop-blur-sm;
     background-image: linear-gradient(
       135deg,
-      rgba(125, 155, 138, 0.06) 0%,
-      transparent 50%,
-      rgba(168, 181, 196, 0.04) 100%
+      rgba(34, 211, 238, 0.04) 0%,
+      transparent 45%,
+      rgba(139, 92, 246, 0.03) 100%
     );
+    box-shadow:
+      0 4px 24px rgba(0, 0, 0, 0.35),
+      inset 0 1px 0 rgba(255, 255, 255, 0.04);
   }
 
   .crypto-card-hover {
-    @apply crypto-card transition-all duration-200 hover:border-zen-sage/35 hover:shadow-zen-lg;
+    @apply crypto-card transition-all duration-300;
+  }
+
+  .crypto-card-hover:hover {
+    @apply border-zen-cyan/20 shadow-zen-lg;
+    transform: translateY(-2px);
   }
 
   .gradient-text {
     @apply bg-clip-text text-transparent;
-    background-image: linear-gradient(135deg, #7d9b8a 0%, #a8b5c4 100%);
+    background-image: linear-gradient(135deg, #22d3ee 0%, #8b5cf6 50%, #7d9b8a 100%);
   }
 
   .section-label {
@@ -42,15 +71,20 @@ body {
   }
 
   .btn-primary {
-    @apply rounded-lg border border-zen-sage/30 bg-zen-sage px-5 py-2.5 text-sm font-semibold text-zen-deep shadow-zen transition-all hover:bg-zen-sage/90 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-40;
+    @apply rounded-xl border border-zen-cyan/25 bg-gradient-to-r from-zen-cyan/90 to-zen-purple/80 px-5 py-2.5 text-sm font-semibold text-zen-deep shadow-glow-sm transition-all hover:from-zen-cyan hover:to-zen-purple/90 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-40;
   }
 
   .btn-ghost {
-    @apply rounded-lg border border-surface-border bg-surface-raised/80 px-4 py-2 text-sm text-gray-300 transition-colors hover:border-surface-hover hover:bg-surface-hover;
+    @apply rounded-xl border border-surface-border/80 bg-surface-raised/60 px-4 py-2 text-sm text-gray-300 backdrop-blur-sm transition-all hover:border-zen-mist/30 hover:bg-surface-hover;
   }
 
   .input-crypto {
-    @apply w-full rounded-lg border border-zen-border bg-zen-deep/90 px-4 py-3 font-mono text-sm text-white shadow-inner-glow placeholder:text-gray-600 transition-colors focus:border-zen-sage/50 focus:outline-none focus:ring-1 focus:ring-zen-sage/30 disabled:opacity-50;
+    @apply w-full rounded-xl border border-zen-border/80 bg-zen-deep/70 px-4 py-3 font-mono text-sm text-white shadow-inner-glow backdrop-blur-sm placeholder:text-gray-600 transition-all focus:border-zen-cyan/40 focus:outline-none focus:ring-2 focus:ring-zen-cyan/15 disabled:opacity-50;
+  }
+
+  .glass-header {
+    @apply border-b border-zen-border/60 bg-zen-deep/70 backdrop-blur-xl;
+    box-shadow: 0 1px 0 rgba(34, 211, 238, 0.06);
   }
 }
 
@@ -72,6 +106,16 @@ body {
   }
   .bg-risk-high {
     @apply border-accent-red/25 bg-accent-red/10;
+  }
+}
+
+@keyframes zen-float {
+  0%,
+  100% {
+    transform: translate(0, 0);
+  }
+  50% {
+    transform: translate(16px, -20px);
   }
 }
 

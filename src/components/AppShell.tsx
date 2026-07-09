@@ -1,8 +1,10 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
 import { ZENERATING } from "@/lib/brand/zenerating";
+import { AmbientBackground } from "./AmbientBackground";
 import { UsageCounter } from "./UsageCounter";
 import { WalletButton } from "./WalletButton";
+import { ZenLogo } from "./ZenLogo";
 import type { UsageResponse } from "@/lib/types";
 
 interface AppShellProps {
@@ -19,26 +21,26 @@ export function AppShell({
   addressBar,
 }: AppShellProps) {
   return (
-    <div className="flex min-h-screen flex-col">
-      <header className="sticky top-0 z-40 border-b border-zen-border/80 bg-zen-deep/85 backdrop-blur-xl">
-        <div className="mx-auto flex w-full max-w-6xl flex-col gap-3 px-4 py-3 sm:flex-row sm:items-center sm:justify-between sm:px-6 sm:py-4">
+    <div className="relative flex min-h-screen flex-col">
+      <AmbientBackground />
+
+      <header className="glass-header sticky top-0 z-40">
+        <div className="mx-auto flex w-full max-w-6xl flex-col gap-3 px-4 py-3 sm:flex-row sm:items-center sm:justify-between sm:px-6 sm:py-3.5">
           <div className="flex min-w-0 items-center gap-3">
-            <Link href="/" className="group flex shrink-0 items-center gap-2.5">
-              <span className="flex h-8 w-8 items-center justify-center rounded-lg border border-zen-sage/30 bg-zen-card text-xs font-bold text-zen-sage shadow-zen">
-                Z
-              </span>
+            <Link href="/" className="group flex shrink-0 items-center gap-3">
+              <ZenLogo size="sm" showGlow className="transition-transform group-hover:scale-105" />
               <span className="flex flex-col leading-tight">
-                <span className="text-sm font-semibold tracking-tight text-white group-hover:text-gray-200">
+                <span className="text-sm font-semibold tracking-tight text-white transition-colors group-hover:text-zen-cyan/90">
                   {ZENERATING.name}
                 </span>
-                <span className="hidden text-[10px] text-gray-600 xs:inline">
+                <span className="hidden text-[10px] text-gray-600 sm:inline">
                   {ZENERATING.tagline}
                 </span>
               </span>
             </Link>
             {addressBar && (
               <>
-                <span className="hidden text-surface-border sm:inline">/</span>
+                <span className="hidden text-zen-border sm:inline">/</span>
                 <div className="min-w-0 flex-1 sm:flex-initial">{addressBar}</div>
               </>
             )}

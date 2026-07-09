@@ -21,10 +21,10 @@ export function UsageCounter({ usage, onUpgradeClick }: UsageCounterProps) {
   if (usage.tier === "admin") {
     return (
       <div
-        className="flex items-center gap-2 rounded-full border border-zen-sage/30 bg-zen-sage/10 px-3 py-1.5 text-xs text-zen-sage sm:text-sm"
+        className="flex items-center gap-2 rounded-full border border-zen-cyan/25 bg-zen-cyan/10 px-3 py-1.5 text-xs text-zen-cyan sm:text-sm"
         data-testid="usage-counter"
       >
-        <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-zen-sage animate-pulse-glow" />
+        <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-zen-cyan animate-pulse-glow" />
         <span className="whitespace-nowrap font-medium">Admin · unlimited</span>
       </div>
     );
@@ -37,10 +37,10 @@ export function UsageCounter({ usage, onUpgradeClick }: UsageCounterProps) {
 
     return (
       <div
-        className="flex items-center gap-2 rounded-full border border-zen-sage/30 bg-zen-sage/10 px-3 py-1.5 text-xs text-zen-sage sm:text-sm"
+        className="flex items-center gap-2 rounded-full border border-zen-cyan/25 bg-zen-cyan/10 px-3 py-1.5 text-xs text-zen-cyan sm:text-sm"
         data-testid="usage-counter"
       >
-        <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-zen-sage animate-pulse-glow" />
+        <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-zen-cyan animate-pulse-glow" />
         <span className="whitespace-nowrap font-medium">
           Pro · unlimited{until ? ` · until ${until}` : ""}
         </span>

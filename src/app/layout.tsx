@@ -18,6 +18,10 @@ export const metadata: Metadata = {
   title: "Zenerating — Mindful Solana Intelligence",
   description:
     "Calm, clear-headed due diligence for Solana wallets and tokens. Risk scores, clustering, and on-chain intelligence.",
+  icons: {
+    icon: "/zenlogo.jpg",
+    apple: "/zenlogo.jpg",
+  },
 };
 
 export default function RootLayout({

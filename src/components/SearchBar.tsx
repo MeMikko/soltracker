@@ -49,7 +49,7 @@ export function SearchBar({
         <div className="relative flex-1">
           <div className="pointer-events-none absolute inset-y-0 left-3 flex items-center">
             <svg
-              className="h-4 w-4 text-gray-600"
+              className="h-4 w-4 text-zen-cyan/50"
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"

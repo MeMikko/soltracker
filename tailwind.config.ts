@@ -38,6 +38,8 @@ const config: Config = {
           deep: "#0a0f0d",
           card: "#141a17",
           border: "#1f2a24",
+          cyan: "#22d3ee",
+          purple: "#8b5cf6",
         },
       },
       fontFamily: {
@@ -51,6 +53,8 @@ const config: Config = {
         "inner-glow": "inset 0 1px 0 rgba(255, 255, 255, 0.05)",
         zen: "0 4px 24px rgba(125, 155, 138, 0.08)",
         "zen-lg": "0 8px 32px rgba(125, 155, 138, 0.14)",
+        "zen-logo":
+          "0 0 40px rgba(34, 211, 238, 0.25), 0 0 80px rgba(139, 92, 246, 0.15)",
       },
       backgroundImage: {
         "gradient-radial": "radial-gradient(var(--tw-gradient-stops))",
@@ -62,6 +66,9 @@ const config: Config = {
       animation: {
         "pulse-glow": "pulse-glow 2.5s ease-in-out infinite",
         shimmer: "shimmer 2s linear infinite",
+        "zen-pulse": "zen-pulse 4s ease-in-out infinite",
+        "zen-float": "zen-float 8s ease-in-out infinite",
+        "zen-float-slow": "zen-float 12s ease-in-out infinite reverse",
       },
       keyframes: {
         "pulse-glow": {
@@ -71,6 +78,14 @@ const config: Config = {
         shimmer: {
           "0%": { backgroundPosition: "-200% 0" },
           "100%": { backgroundPosition: "200% 0" },
+        },
+        "zen-pulse": {
+          "0%, 100%": { opacity: "0.5", transform: "scale(1)" },
+          "50%": { opacity: "0.9", transform: "scale(1.05)" },
+        },
+        "zen-float": {
+          "0%, 100%": { transform: "translate(0, 0)" },
+          "50%": { transform: "translate(12px, -18px)" },
         },
       },
     },

@@ -11,6 +11,7 @@ import {
 } from "@/lib/pro/config";
 import { sendProSubscriptionPayment } from "@/lib/wallet/pro-payment";
 import { WalletPickerModal } from "./WalletPickerModal";
+import { ZenLogo } from "./ZenLogo";
 
 interface UpgradeModalProps {
   open: boolean;
@@ -107,12 +108,17 @@ export function UpgradeModal({ open, onClose }: UpgradeModalProps) {
           className="crypto-card w-full max-w-md border-zen-sage/20 p-6 shadow-zen-lg sm:p-8"
           onClick={(e) => e.stopPropagation()}
         >
-          <div className="mb-1 flex h-10 w-10 items-center justify-center rounded-xl border border-zen-sage/30 bg-zen-sage/15 text-sm font-bold text-zen-sage">
-            Pro
+          <div className="flex items-center gap-3">
+            <ZenLogo size="md" showGlow />
+            <div>
+              <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-zen-cyan">
+                Pro
+              </p>
+              <h2 id="upgrade-title" className="text-xl font-bold text-white">
+                {isPro ? "Pro active" : "Upgrade to Pro"}
+              </h2>
+            </div>
           </div>
-          <h2 id="upgrade-title" className="mt-4 text-xl font-bold text-white">
-            {isPro ? "Pro active" : "Upgrade to Pro"}
-          </h2>
 
           {isPro ? (
             <p className="mt-2 text-sm leading-relaxed text-zen-sage">

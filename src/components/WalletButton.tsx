@@ -24,7 +24,7 @@ export function WalletButton() {
   if (session?.authenticated && session.wallet) {
     return (
       <div className="flex items-center gap-2">
-        <span className="hidden rounded-full border border-solana-green/30 bg-solana-green/10 px-2.5 py-1 font-mono text-xs text-solana-green sm:inline">
+        <span className="hidden rounded-full border border-zen-cyan/25 bg-zen-cyan/10 px-2.5 py-1 font-mono text-xs text-zen-cyan sm:inline">
           {truncateAddress(session.wallet, 4)}
         </span>
         <button

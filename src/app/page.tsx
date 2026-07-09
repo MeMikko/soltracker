@@ -9,15 +9,28 @@ import { SearchBar } from "@/components/SearchBar";
 import { UpgradeModal } from "@/components/UpgradeModal";
 import { ComingSoonSection } from "@/components/ComingSoonSection";
 import { WalletGate } from "@/components/WalletGate";
+import { ZenLogo } from "@/components/ZenLogo";
 import { useUsage } from "@/hooks/useUsage";
 import { searchAddress } from "@/lib/api-client";
 import { ZENERATING } from "@/lib/brand/zenerating";
 import type { ApiError } from "@/lib/types";
 
 const FEATURES = [
-  { label: "Risk Scoring", desc: "0–100 safety score with factor breakdown" },
-  { label: "Token Analysis", desc: "LP, holders, mint authority & more" },
-  { label: "Wallet Intel", desc: "Age, balance, activity & tx history" },
+  {
+    label: "Risk Scoring",
+    desc: "0–100 safety score with factor breakdown",
+    accent: "from-zen-cyan/20 to-transparent",
+  },
+  {
+    label: "Token Analysis",
+    desc: "LP, holders, mint authority & more",
+    accent: "from-zen-purple/20 to-transparent",
+  },
+  {
+    label: "Wallet Intel",
+    desc: "Age, balance, activity & tx history",
+    accent: "from-zen-sage/25 to-transparent",
+  },
 ];
 
 export default function HomePage() {
@@ -60,11 +73,8 @@ export default function HomePage() {
   }
 
   return (
-    <AppShell
-      usage={usage}
-      onUpgradeClick={() => setUpgradeOpen(true)}
-    >
-      <main className="mx-auto flex w-full max-w-6xl flex-1 flex-col px-4 pb-16 pt-10 sm:px-6 sm:pt-16 lg:pt-24">
+    <AppShell usage={usage} onUpgradeClick={() => setUpgradeOpen(true)}>
+      <main className="mx-auto flex w-full max-w-6xl flex-1 flex-col px-4 pb-16 pt-8 sm:px-6 sm:pt-12 lg:pt-16">
         {loading ? (
           <LoadingState message="Resolving address on-chain…" />
         ) : error ? (
@@ -84,35 +94,39 @@ export default function HomePage() {
           </div>
         ) : (
           <div className="flex flex-col items-center">
-            <div className="mb-3 flex items-center gap-2 rounded-full border border-zen-border bg-zen-card/60 px-3 py-1 text-xs text-gray-500">
-              <span className="h-1.5 w-1.5 animate-pulse-glow rounded-full bg-zen-sage" />
-              {ZENERATING.name} · Live Solana mainnet
-            </div>
-
-            <p className="text-[10px] font-semibold uppercase tracking-[0.3em] text-zen-sage">
-              {ZENERATING.name}
-            </p>
-            <h1 className="mt-2 max-w-2xl text-center text-3xl font-bold tracking-tight text-white sm:text-4xl lg:text-5xl">
-              {ZENERATING.tagline}
-            </h1>
-            <p className="mt-4 max-w-lg text-center text-sm leading-relaxed text-gray-500 sm:text-base">
-              {ZENERATING.subtagline} Paste a wallet or token mint for risk
-              scores, wallet clustering, and calm on-chain clarity.
-            </p>
-
-            <div className="mt-6 w-full max-w-2xl">
-              <WalletGate authenticated={isAuthenticated} />
-            </div>
-
-            <div className="mt-5 w-full max-w-2xl">
-              <SearchBar
-                onSearch={handleSearch}
-                disabled={
-                  !isAuthenticated ||
-                  (usage?.tier === "free" && usage.remaining === 0)
-                }
-                autoFocus={isAuthenticated}
+            <div className="relative mb-6">
+              <span
+                className="absolute inset-0 -m-8 rounded-full bg-gradient-to-br from-zen-cyan/25 via-zen-purple/15 to-transparent blur-2xl animate-zen-pulse"
+                aria-hidden
               />
+              <ZenLogo size="hero" showGlow className="shadow-zen-logo" />
+            </div>
+
+            <div className="mb-4 flex items-center gap-2 rounded-full border border-zen-border/60 bg-zen-card/50 px-3.5 py-1.5 text-xs text-gray-500 backdrop-blur-sm">
+              <span className="h-1.5 w-1.5 animate-pulse-glow rounded-full bg-zen-cyan" />
+              Live Solana mainnet
+            </div>
+
+            <h1 className="max-w-2xl text-center text-3xl font-bold tracking-tight sm:text-4xl lg:text-5xl">
+              <span className="gradient-text">{ZENERATING.tagline}</span>
+            </h1>
+            <p className="mt-4 max-w-md text-center text-sm leading-relaxed text-gray-500 sm:text-base">
+              {ZENERATING.subtagline}
+            </p>
+
+            <div className="crypto-card mt-8 w-full max-w-2xl p-4 sm:p-5">
+              <WalletGate authenticated={isAuthenticated} />
+              <div className={isAuthenticated ? "mt-4" : ""}>
+                <SearchBar
+                  onSearch={handleSearch}
+                  disabled={
+                    !isAuthenticated ||
+                    (usage?.tier === "free" && usage.remaining === 0)
+                  }
+                  autoFocus={isAuthenticated}
+                  compact
+                />
+              </div>
             </div>
 
             {usage?.tier === "free" && usage.remaining === 0 && isAuthenticated && (
@@ -121,18 +135,27 @@ export default function HomePage() {
                 <button
                   type="button"
                   onClick={() => setUpgradeOpen(true)}
-                  className="font-medium text-zen-sage hover:underline"
+                  className="font-medium text-zen-cyan hover:underline"
                 >
-                  Upgrade to Pro for unlimited searches
+                  Upgrade to Pro
                 </button>
               </p>
             )}
 
-            <div className="mt-16 grid w-full max-w-3xl grid-cols-1 gap-4 xs:grid-cols-3">
+            <div className="mt-14 grid w-full max-w-3xl grid-cols-1 gap-4 xs:grid-cols-3">
               {FEATURES.map((feature) => (
-                <div key={feature.label} className="crypto-card-hover p-4 text-center sm:p-5">
-                  <p className="text-sm font-semibold text-white">{feature.label}</p>
-                  <p className="mt-1 text-xs leading-relaxed text-gray-600">
+                <div
+                  key={feature.label}
+                  className="crypto-card-hover group relative overflow-hidden p-5 text-center"
+                >
+                  <div
+                    className={`pointer-events-none absolute inset-0 bg-gradient-to-b ${feature.accent} opacity-0 transition-opacity duration-300 group-hover:opacity-100`}
+                    aria-hidden
+                  />
+                  <p className="relative text-sm font-semibold text-white">
+                    {feature.label}
+                  </p>
+                  <p className="relative mt-1.5 text-xs leading-relaxed text-gray-500">
                     {feature.desc}
                   </p>
                 </div>
@@ -144,9 +167,8 @@ export default function HomePage() {
         )}
       </main>
 
-      <footer className="border-t border-zen-border/60 py-6 text-center text-xs text-gray-600">
-        {ZENERATING.name} · Powered by Helius · Data cached 12 min · Not financial
-        advice
+      <footer className="border-t border-zen-border/40 py-6 text-center text-xs text-gray-600">
+        {ZENERATING.name} · Helius · Cached 12 min · Not financial advice
       </footer>
 
       <UpgradeModal open={upgradeOpen} onClose={() => setUpgradeOpen(false)} />

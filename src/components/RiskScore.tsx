@@ -38,7 +38,8 @@ export function RiskScore({ score, level }: RiskScoreProps) {
       className={`crypto-card relative overflow-hidden p-6 text-center ring-1 sm:p-8 ${styles.box} ${styles.ring}`}
       data-testid="risk-score"
     >
-      <div className="pointer-events-none absolute -right-8 -top-8 h-32 w-32 rounded-full bg-white/5 blur-2xl" />
+      <div className="pointer-events-none absolute -right-8 -top-8 h-32 w-32 rounded-full bg-zen-cyan/10 blur-2xl" />
+      <div className="pointer-events-none absolute -bottom-6 -left-6 h-24 w-24 rounded-full bg-zen-purple/10 blur-2xl" />
 
       <p className="section-label">Risk Score</p>
       <p className="mt-1 text-xs text-gray-600">100 = safest · 0 = highest risk</p>
