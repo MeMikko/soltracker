@@ -12,7 +12,7 @@ import {
 } from "@/lib/token/holder-analytics";
 import { getTokenData } from "./token-service";
 
-export const TOKEN_ANALYTICS_CACHE_PREFIX = "token:analytics:v1:";
+export const TOKEN_ANALYTICS_CACHE_PREFIX = "token:analytics:v2:";
 
 export interface TokenAnalytics {
   mint: string;
@@ -44,6 +44,7 @@ async function fetchLiveAnalytics(mint: string): Promise<TokenAnalytics> {
       supplyRaw: token.supply,
       decimals: token.decimals,
       holderCount: token.holderCount,
+      lp: token.lp,
     }),
     buildDeployerReputation(token.creatorWallet, mint),
   ]);

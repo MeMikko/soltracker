@@ -1,5 +1,10 @@
 import { heliusRpc } from "@/lib/helius/client";
+import type { TokenLpInfo } from "@/lib/helius/types";
 import type { HolderDistribution } from "@/lib/types";
+import {
+  buildLiquidityExclusionSet,
+  isLiquidityHolder,
+} from "./liquidity-exclusions";
 
 const TOKEN_PROGRAM = "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA";
 const TOKEN_2022_PROGRAM = "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb";
@@ -18,6 +23,8 @@ export interface HolderAnalytics {
   holderCount: number;
   sampled: boolean;
   topHolders: TopHolderEntry[];
+  lpExcluded: boolean;
+  excludedLiquidityPercent: number;
 }
 
 interface LargestAccountsResult {
@@ -158,6 +165,7 @@ async function resolveOwners(
 
       return {
         owner,
+        tokenAccount: entry.address,
         balance: Number.isFinite(balance) ? Number(balance) : 0,
       };
     })
@@ -189,10 +197,44 @@ async function fetchAllHolderBalances(
 
       return {
         owner,
+        tokenAccount: entry.pubkey,
         balance: Number.isFinite(balance) ? Number(balance) : 0,
       };
     })
     .filter((entry) => entry.balance > 0);
+}
+
+type HolderEntry = {
+  owner: string;
+  tokenAccount?: string;
+  balance: number;
+};
+
+function excludeLiquidityHolders(
+  entries: HolderEntry[],
+  excluded: Set<string>
+): { holders: HolderEntry[]; excludedLiquidityPercent: number; lpExcluded: boolean } {
+  let excludedBalance = 0;
+
+  const holders = entries.filter((entry) => {
+    if (isLiquidityHolder(entry, excluded)) {
+      excludedBalance += entry.balance;
+      return false;
+    }
+    return true;
+  });
+
+  const totalRaw = entries.reduce((sum, entry) => sum + entry.balance, 0);
+  const excludedLiquidityPercent =
+    totalRaw > 0
+      ? Math.round((excludedBalance / totalRaw) * 1000) / 10
+      : 0;
+
+  return {
+    holders,
+    excludedLiquidityPercent,
+    lpExcluded: excludedBalance > 0,
+  };
 }
 
 async function detectTokenProgram(mintAddress: string): Promise<string> {
@@ -211,11 +253,16 @@ export async function fetchHolderAnalytics(input: {
   supplyRaw: string;
   decimals: number;
   holderCount: number;
+  lp: TokenLpInfo;
 }): Promise<HolderAnalytics> {
   const totalSupply = supplyUi(input.supplyRaw, input.decimals);
   const programId = await detectTokenProgram(input.mintAddress);
+  const exclusionSet = await buildLiquidityExclusionSet({
+    mintAddress: input.mintAddress,
+    lp: input.lp,
+  });
 
-  let entries: Array<{ owner: string; balance: number }> = [];
+  let entries: HolderEntry[] = [];
   let sampled = false;
 
   if (input.holderCount > 0 && input.holderCount <= FULL_SCAN_HOLDER_LIMIT) {
@@ -229,14 +276,19 @@ export async function fetchHolderAnalytics(input: {
     entries = await resolveOwners(largest.value ?? []);
   }
 
-  const balances = entries.map((entry) => entry.balance);
+  const { holders, excludedLiquidityPercent, lpExcluded } =
+    excludeLiquidityHolders(entries, exclusionSet);
+
+  const balances = holders.map((entry) => entry.balance);
   const distribution = computeDistribution(balances, totalSupply);
 
   return {
     distribution,
     holderCount: input.holderCount,
     sampled,
-    topHolders: buildTopHolders(entries, totalSupply),
+    topHolders: buildTopHolders(holders, totalSupply),
+    lpExcluded,
+    excludedLiquidityPercent,
   };
 }
 
@@ -265,5 +317,7 @@ export function mockHolderAnalytics(
       balance: 1_000_000 * (5 - index),
       percent: Math.round((top10 / (index + 1)) * 10) / 10,
     })),
+    lpExcluded: true,
+    excludedLiquidityPercent: 42,
   };
 }

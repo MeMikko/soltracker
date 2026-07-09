@@ -49,11 +49,20 @@ export function HolderAnalyticsSection({
         </div>
       ) : data ? (
         <>
-          {data.sampled && (
-            <p className="text-[11px] text-gray-600">
-              Large holder base — metrics estimated from top on-chain accounts.
-            </p>
-          )}
+          <div className="space-y-1 text-[11px] text-gray-600">
+            {data.lpExcluded && (
+              <p>
+                Liquidity pool vaults excluded
+                {data.excludedLiquidityPercent > 0
+                  ? ` (${data.excludedLiquidityPercent}% of scanned supply)`
+                  : ""}
+                .
+              </p>
+            )}
+            {data.sampled && (
+              <p>Large holder base — metrics estimated from top on-chain accounts.</p>
+            )}
+          </div>
 
           <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
             <DetailCard
