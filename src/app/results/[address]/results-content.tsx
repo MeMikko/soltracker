@@ -180,7 +180,7 @@ export function ResultsContent() {
       addressBar={addressBar}
     >
       <main className="mx-auto w-full max-w-6xl flex-1 px-4 py-6 sm:px-6 sm:py-8">
-        <div className="crypto-card mb-6 space-y-3 p-4 sm:p-5">
+        <div className="crypto-card mx-auto mb-6 w-full max-w-4xl space-y-3 p-4 sm:p-5">
           <WalletGate authenticated={isAuthenticated} />
           <SearchBar
             onSearch={handleSearch}

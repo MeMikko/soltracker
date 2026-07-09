@@ -117,7 +117,7 @@ export default function HomePage() {
               {ZENERATING.subtagline}
             </p>
 
-            <div className="crypto-card mt-8 w-full max-w-2xl p-4 sm:p-5">
+            <div className="crypto-card mt-8 w-full max-w-4xl p-4 sm:p-5">
               <WalletGate authenticated={isAuthenticated} />
               <div className={isAuthenticated ? "mt-4" : ""}>
                 <SearchBar
