@@ -1,4 +1,6 @@
 import type { CacheEnvelope } from "@/lib/cache/types";
+import { FEATURED_TOKEN_MINT } from "@/lib/featured-token";
+import type { FeaturedTokenAdminSetting } from "@/lib/types";
 
 interface MemoryCacheEntry {
   value: unknown;
@@ -12,6 +14,12 @@ const cacheEntries = new Map<string, MemoryCacheEntry>();
 const proExpiryByWallet = new Map<string, number>();
 const searchPackBalanceByWallet = new Map<string, number>();
 const tokenUnlockExpiryByKey = new Map<string, number>();
+let featuredTokenSetting: FeaturedTokenAdminSetting = {
+  enabled: true,
+  mint: FEATURED_TOKEN_MINT,
+  updatedAt: new Date(0).toISOString(),
+  updatedBy: null,
+};
 
 function tokenUnlockKey(wallet: string, mintAddress: string): string {
   return `${wallet}:${mintAddress}`;
@@ -137,6 +145,16 @@ export function memorySetTokenUnlock(
     tokenUnlockKey(wallet, mintAddress),
     expiresAtMs
   );
+}
+
+export function memoryGetFeaturedTokenSetting(): FeaturedTokenAdminSetting {
+  return featuredTokenSetting;
+}
+
+export function memorySetFeaturedTokenSetting(
+  setting: FeaturedTokenAdminSetting
+): void {
+  featuredTokenSetting = setting;
 }
 
 export function memoryCacheSet<T>(

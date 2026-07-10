@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
+import { AdminFeaturedTokenPanel } from "@/components/admin/AdminFeaturedTokenPanel";
 import { DetailCard } from "@/components/DetailCard";
 import { WalletGate } from "@/components/WalletGate";
 import { formatNumber, truncateAddress } from "@/lib/format";
@@ -149,6 +150,8 @@ export function AdminDashboard({
           {error.error}
         </div>
       )}
+
+      <AdminFeaturedTokenPanel isAdmin={isAdmin} />
 
       {analytics && (
         <>

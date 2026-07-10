@@ -144,6 +144,15 @@ model TokenUnlock {
   @@index([mintAddress])
 }
 
+/// Singleton featured token spotlight config (row id = 1).
+model FeaturedTokenSetting {
+  id        Int      @id @default(1)
+  mint      String?
+  enabled   Boolean  @default(true)
+  updatedAt DateTime @updatedAt
+  updatedBy String?
+}
+
 /// Globally tracked token searches — one row per mint, deduplicated on the homepage.
 model TokenSearchStat {
   mintAddress    String   @id

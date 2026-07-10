@@ -2,15 +2,15 @@
 
 import { useEffect, useState } from "react";
 import { TokenSearchAvatar } from "@/components/TokenSearchAvatar";
-import { FEATURED_TOKEN } from "@/lib/featured-token";
 import { truncateAddress } from "@/lib/format";
 
 interface FeaturedTokenData {
+  enabled?: boolean;
   mint: string;
   name: string | null;
   symbol: string | null;
   imageUrl: string | null;
-  href: string;
+  href: string | null;
 }
 
 interface FeaturedTokenProps {
@@ -20,6 +20,7 @@ interface FeaturedTokenProps {
 export function FeaturedToken({ className }: FeaturedTokenProps = {}) {
   const [token, setToken] = useState<FeaturedTokenData | null>(null);
   const [loading, setLoading] = useState(true);
+  const [visible, setVisible] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -28,25 +29,18 @@ export function FeaturedToken({ className }: FeaturedTokenProps = {}) {
       .then((res) => (res.ok ? res.json() : null))
       .then((data: FeaturedTokenData | null) => {
         if (cancelled) return;
-        setToken(
-          data ?? {
-            mint: FEATURED_TOKEN.mint,
-            name: null,
-            symbol: null,
-            imageUrl: null,
-            href: FEATURED_TOKEN.href,
-          }
-        );
+        if (!data?.enabled || !data.mint || !data.href) {
+          setVisible(false);
+          setToken(null);
+          return;
+        }
+        setVisible(true);
+        setToken(data);
       })
       .catch(() => {
         if (cancelled) return;
-        setToken({
-          mint: FEATURED_TOKEN.mint,
-          name: null,
-          symbol: null,
-          imageUrl: null,
-          href: FEATURED_TOKEN.href,
-        });
+        setVisible(false);
+        setToken(null);
       })
       .finally(() => {
         if (!cancelled) setLoading(false);
@@ -57,9 +51,18 @@ export function FeaturedToken({ className }: FeaturedTokenProps = {}) {
     };
   }, []);
 
-  const href = token?.href ?? FEATURED_TOKEN.href;
-  const mint = token?.mint ?? FEATURED_TOKEN.mint;
-  const label = token?.name ?? token?.symbol ?? truncateAddress(mint, 4);
+  if (!loading && !visible) {
+    return null;
+  }
+
+  const href = token?.href;
+  const mint = token?.mint;
+  const label =
+    token?.name ?? token?.symbol ?? (mint ? truncateAddress(mint, 4) : "Token");
+
+  if (!href || !mint) {
+    return null;
+  }
 
   return (
     <section className={`relative w-full max-w-6xl ${className ?? ""}`}>

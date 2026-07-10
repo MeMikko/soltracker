@@ -128,6 +128,20 @@ export interface AdminPurchaseRow {
   metadata: Record<string, string> | null;
 }
 
+export interface FeaturedTokenAdminSetting {
+  enabled: boolean;
+  mint: string | null;
+  updatedAt: string;
+  updatedBy: string | null;
+}
+
+export interface FeaturedTokenPublic {
+  enabled: boolean;
+  mint: string | null;
+  href: string | null;
+  updatedAt: string;
+}
+
 export interface AdminAnalytics {
   generatedAt: string;
   databaseAvailable: boolean;
