@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { getWalletWarning } from "@/lib/admin/wallet-warning-service";
 import { handleApiError } from "@/lib/api/handle-error";
 import { fetchWalletWithPolicy } from "@/lib/api/fetch-policy";
 import { toWalletDetails } from "@/lib/api/mappers";
@@ -15,9 +16,12 @@ export async function GET(
     const address = parseSolanaAddress(decodeURIComponent(raw));
 
     const result = await fetchWalletWithPolicy(address, request);
+    const details = toWalletDetails(result.data);
+    const walletWarning = await getWalletWarning(details.address);
 
     return NextResponse.json({
-      ...toWalletDetails(result.data),
+      ...details,
+      walletWarning,
       usage: result.usage,
     });
   } catch (error) {

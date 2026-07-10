@@ -21,6 +21,7 @@ import { TokenIntelligenceSections } from "@/components/token/TokenIntelligenceS
 import { WalletDetails } from "@/components/WalletDetails";
 import { ZENERATING } from "@/lib/brand/zenerating";
 import { WalletGate } from "@/components/WalletGate";
+import { WalletWarningBanner } from "@/components/WalletWarningBanner";
 import { useTokenUnlock } from "@/hooks/useTokenUnlock";
 import { useUsage } from "@/hooks/useUsage";
 import {
@@ -242,6 +243,20 @@ export function ResultsContent() {
                 {entityType === "token" ? "Token intelligence" : "Wallet intelligence"}
               </p>
             </div>
+
+            {token?.creatorWarning && (
+              <WalletWarningBanner
+                warning={token.creatorWarning}
+                context="creator"
+              />
+            )}
+
+            {wallet?.walletWarning && (
+              <WalletWarningBanner
+                warning={wallet.walletWarning}
+                context="wallet"
+              />
+            )}
 
             {token && <TokenHeader data={token} />}
 

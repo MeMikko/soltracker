@@ -1,6 +1,6 @@
 import type { CacheEnvelope } from "@/lib/cache/types";
 import { FEATURED_TOKEN_MINT } from "@/lib/featured-token";
-import type { FeaturedTokenAdminSetting } from "@/lib/types";
+import type { FeaturedTokenAdminSetting, WalletWarningEntry } from "@/lib/types";
 
 interface MemoryCacheEntry {
   value: unknown;
@@ -20,6 +20,7 @@ let featuredTokenSetting: FeaturedTokenAdminSetting = {
   updatedAt: new Date(0).toISOString(),
   updatedBy: null,
 };
+const walletWarnings = new Map<string, WalletWarningEntry>();
 
 function tokenUnlockKey(wallet: string, mintAddress: string): string {
   return `${wallet}:${mintAddress}`;
@@ -145,6 +146,37 @@ export function memorySetTokenUnlock(
     tokenUnlockKey(wallet, mintAddress),
     expiresAtMs
   );
+}
+
+export function memoryListWalletWarnings(): WalletWarningEntry[] {
+  return Array.from(walletWarnings.values()).sort(
+    (a, b) => new Date(b.addedAt).getTime() - new Date(a.addedAt).getTime()
+  );
+}
+
+export function memoryGetWalletWarning(
+  wallet: string
+): WalletWarningEntry | null {
+  return walletWarnings.get(wallet) ?? null;
+}
+
+export function memoryAddWalletWarning(
+  wallet: string,
+  addedBy: string,
+  note: string | null
+): WalletWarningEntry {
+  const entry: WalletWarningEntry = {
+    wallet,
+    note,
+    addedBy,
+    addedAt: new Date().toISOString(),
+  };
+  walletWarnings.set(wallet, entry);
+  return entry;
+}
+
+export function memoryRemoveWalletWarning(wallet: string): boolean {
+  return walletWarnings.delete(wallet);
 }
 
 export function memoryGetFeaturedTokenSetting(): FeaturedTokenAdminSetting {

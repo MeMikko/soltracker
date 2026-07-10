@@ -34,6 +34,7 @@ export interface WalletDetails {
   txCount: number;
   firstTx: string | null;
   lastTx: string | null;
+  walletWarning?: WalletWarningInfo | null;
 }
 
 export interface TokenLpInfo {
@@ -60,6 +61,7 @@ export interface TokenDetails {
   freezeAuthority: string | null;
   mintAuthorityRevoked: boolean;
   freezeAuthorityRevoked: boolean;
+  creatorWarning?: WalletWarningInfo | null;
 }
 
 export interface SearchResponse {
@@ -126,6 +128,16 @@ export interface AdminPurchaseRow {
   sol: number;
   paidAt: string;
   metadata: Record<string, string> | null;
+}
+
+export interface WalletWarningInfo {
+  wallet: string;
+  note: string | null;
+  addedAt: string;
+}
+
+export interface WalletWarningEntry extends WalletWarningInfo {
+  addedBy: string;
 }
 
 export interface FeaturedTokenAdminSetting {

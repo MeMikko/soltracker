@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { getWalletWarning } from "@/lib/admin/wallet-warning-service";
 import { handleApiError } from "@/lib/api/handle-error";
 import { fetchTokenWithPolicy } from "@/lib/api/fetch-policy";
 import { toTokenDetails } from "@/lib/api/mappers";
@@ -17,6 +18,9 @@ export async function GET(
 
     const result = await fetchTokenWithPolicy(mint, request);
     const details = toTokenDetails(result.data);
+    const creatorWarning = details.creator
+      ? await getWalletWarning(details.creator)
+      : null;
 
     await recordTokenSearch({
       mint: details.mint,
@@ -27,6 +31,7 @@ export async function GET(
 
     return NextResponse.json({
       ...details,
+      creatorWarning,
       usage: result.usage,
     });
   } catch (error) {

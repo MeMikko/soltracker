@@ -144,6 +144,16 @@ model TokenUnlock {
   @@index([mintAddress])
 }
 
+/// Admin-curated wallets flagged for prior rugs or malicious deploys.
+model WalletWarning {
+  wallet  String   @id
+  note    String?  @db.Text
+  addedBy String
+  addedAt DateTime @default(now())
+
+  @@index([addedAt])
+}
+
 /// Singleton featured token spotlight config (row id = 1).
 model FeaturedTokenSetting {
   id        Int      @id @default(1)
