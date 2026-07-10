@@ -50,6 +50,14 @@ export function AppShell({
             )}
           </div>
           <div className="flex flex-wrap items-center justify-end gap-2 sm:gap-3">
+            {usage?.tier === "admin" && (
+              <Link
+                href="/admin"
+                className="rounded-lg border border-zen-cyan/25 bg-zen-cyan/10 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.15em] text-zen-cyan transition-colors hover:border-zen-cyan/40 hover:bg-zen-cyan/15"
+              >
+                Admin
+              </Link>
+            )}
             <WalletButton />
             <UsageCounter usage={usage} onUpgradeClick={onUpgradeClick} />
           </div>

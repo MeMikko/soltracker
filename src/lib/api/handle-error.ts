@@ -2,6 +2,7 @@ import { ZodError } from "zod";
 import { apiError } from "@/lib/api-errors";
 import { WalletAuthRequiredError } from "@/lib/auth/errors";
 import { HeliusError } from "@/lib/helius/errors";
+import { AdminRequiredError } from "@/lib/auth/admin-access";
 import { ProRequiredError } from "@/lib/pro/access";
 import { RateLimitExceededError } from "@/lib/rate-limit";
 
@@ -30,6 +31,14 @@ export function handleApiError(error: unknown) {
     return apiError(
       "Wallet and token clustering require Pro.",
       "PRO_REQUIRED",
+      403
+    );
+  }
+
+  if (error instanceof AdminRequiredError) {
+    return apiError(
+      "Admin access required.",
+      "ADMIN_REQUIRED",
       403
     );
   }

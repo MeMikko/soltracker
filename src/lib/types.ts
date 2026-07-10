@@ -99,6 +99,65 @@ export interface AuthSession {
   disabled?: boolean;
 }
 
+export interface AdminDailySearchStat {
+  date: string;
+  searches: number;
+  searchers: number;
+}
+
+export interface AdminTopTokenStat {
+  mint: string;
+  name: string | null;
+  symbol: string | null;
+  searchCount: number;
+  lastSearchedAt: string;
+}
+
+export interface AdminProPaymentRow {
+  wallet: string;
+  sol: number;
+  paidAt: string;
+  periodEnd: string;
+}
+
+export interface AdminPurchaseRow {
+  wallet: string;
+  product: string;
+  sol: number;
+  paidAt: string;
+  metadata: Record<string, string> | null;
+}
+
+export interface AdminAnalytics {
+  generatedAt: string;
+  databaseAvailable: boolean;
+  overview: {
+    searchesToday: number;
+    searchesLast7Days: number;
+    uniqueSearchersToday: number;
+    uniqueSearchersLast7Days: number;
+    activeProSubscriptions: number;
+    activeTokenUnlocks: number;
+    bonusSearchesOutstanding: number;
+    trackedTokens: number;
+    cachedTokens: number;
+    cachedWallets: number;
+  };
+  revenue: {
+    proPaymentsCount: number;
+    proRevenueSol: number;
+    searchPackPurchases: number;
+    searchPackRevenueSol: number;
+    tokenUnlockPurchases: number;
+    tokenUnlockRevenueSol: number;
+    totalRevenueSol: number;
+  };
+  dailySearches: AdminDailySearchStat[];
+  topTokens: AdminTopTokenStat[];
+  recentProPayments: AdminProPaymentRow[];
+  recentPurchases: AdminPurchaseRow[];
+}
+
 export interface ApiError {
   error: string;
   code:
@@ -113,5 +172,6 @@ export interface ApiError {
     | "AUTH_INVALID"
     | "PAYMENT_INVALID"
     | "PAYMENT_USED"
-    | "PRO_REQUIRED";
+    | "PRO_REQUIRED"
+    | "ADMIN_REQUIRED";
 }
