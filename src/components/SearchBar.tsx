@@ -1,7 +1,13 @@
 "use client";
 
 import { FormEvent, useState } from "react";
+import { CoinFlipButton } from "@/components/CoinFlipButton";
 import { normalizeAddress, safeParseSolanaAddress } from "@/lib/validation";
+
+interface TryLuckConfig {
+  disabled?: boolean;
+  onPick: (mint: string) => void | Promise<void>;
+}
 
 interface SearchBarProps {
   onSearch: (address: string) => void;
@@ -9,6 +15,7 @@ interface SearchBarProps {
   disabled?: boolean;
   autoFocus?: boolean;
   compact?: boolean;
+  tryLuck?: TryLuckConfig;
 }
 
 export function SearchBar({
@@ -17,9 +24,11 @@ export function SearchBar({
   disabled = false,
   autoFocus = false,
   compact = false,
+  tryLuck,
 }: SearchBarProps) {
   const [value, setValue] = useState("");
   const [clientError, setClientError] = useState<string | null>(null);
+  const [luckError, setLuckError] = useState<string | null>(null);
 
   function handleSubmit(e: FormEvent) {
     e.preventDefault();
@@ -37,8 +46,11 @@ export function SearchBar({
     }
 
     setClientError(null);
+    setLuckError(null);
     onSearch(address);
   }
+
+  const formError = clientError ?? luckError;
 
   return (
     <form
@@ -46,7 +58,7 @@ export function SearchBar({
       className={`w-full ${compact ? "max-w-none" : "max-w-2xl"}`}
     >
       <div className="flex flex-col gap-2 sm:flex-row">
-        <div className="relative flex-1">
+        <div className="relative min-w-0 flex-1">
           <div className="pointer-events-none absolute inset-y-0 left-3 flex items-center">
             <svg
               className="h-4 w-4 text-zen-cyan/50"
@@ -78,17 +90,26 @@ export function SearchBar({
             autoComplete="off"
           />
         </div>
-        <button
-          type="submit"
-          disabled={loading || disabled}
-          className="btn-primary shrink-0 px-6 py-3 sm:py-2.5"
-        >
-          {loading ? "Searching…" : "Analyze"}
-        </button>
+        <div className="flex shrink-0 gap-2">
+          <button
+            type="submit"
+            disabled={loading || disabled}
+            className="btn-primary min-w-0 flex-1 px-5 py-3 sm:flex-none sm:px-6 sm:py-2.5"
+          >
+            {loading ? "Searching…" : "Analyze"}
+          </button>
+          {tryLuck && (
+            <CoinFlipButton
+              disabled={tryLuck.disabled || loading || disabled}
+              onPick={tryLuck.onPick}
+              onError={setLuckError}
+            />
+          )}
+        </div>
       </div>
-      {clientError && (
+      {formError && (
         <p className="mt-2 text-sm text-accent-red" role="alert">
-          {clientError}
+          {formError}
         </p>
       )}
     </form>

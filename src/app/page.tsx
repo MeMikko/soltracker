@@ -12,7 +12,6 @@ import {
   UpgradeModal,
   type PurchaseFocus,
 } from "@/components/UpgradeModal";
-import { CoinFlipButton } from "@/components/CoinFlipButton";
 import { ComingSoonSection } from "@/components/ComingSoonSection";
 import { WalletGate } from "@/components/WalletGate";
 import { ZenLogo } from "@/components/ZenLogo";
@@ -135,7 +134,7 @@ export default function HomePage() {
               <div className="flex flex-col gap-4">
                 <div className="crypto-card w-full p-4 sm:p-5">
                   <WalletGate authenticated={isAuthenticated} />
-                  <div className={isAuthenticated ? "mt-4 space-y-3" : ""}>
+                  <div className={isAuthenticated ? "mt-4" : ""}>
                     <SearchBar
                       onSearch={handleSearch}
                       disabled={
@@ -146,18 +145,19 @@ export default function HomePage() {
                       }
                       autoFocus={isAuthenticated}
                       compact
+                      tryLuck={
+                        isAuthenticated
+                          ? {
+                              disabled:
+                                loading ||
+                                (usage?.tier === "free" &&
+                                  usage.remaining === 0 &&
+                                  (usage.bonusSearches ?? 0) === 0),
+                              onPick: handleSearch,
+                            }
+                          : undefined
+                      }
                     />
-                    {isAuthenticated && (
-                      <CoinFlipButton
-                        disabled={
-                          loading ||
-                          (usage?.tier === "free" &&
-                            usage.remaining === 0 &&
-                            (usage.bonusSearches ?? 0) === 0)
-                        }
-                        onPick={handleSearch}
-                      />
-                    )}
                   </div>
                 </div>
 
