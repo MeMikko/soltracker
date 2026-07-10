@@ -71,6 +71,7 @@ const config: Config = {
         "zen-spin-slow": "zen-spin 18s linear infinite",
         "zen-float": "zen-float 8s ease-in-out infinite",
         "zen-float-slow": "zen-float 12s ease-in-out infinite reverse",
+        "coin-flip": "coin-flip 0.9s ease-in-out",
       },
       keyframes: {
         "pulse-glow": {
@@ -96,6 +97,11 @@ const config: Config = {
         "zen-float": {
           "0%, 100%": { transform: "translate(0, 0)" },
           "50%": { transform: "translate(12px, -18px)" },
+        },
+        "coin-flip": {
+          "0%": { transform: "rotateY(0deg) scale(1)" },
+          "50%": { transform: "rotateY(540deg) scale(1.08)" },
+          "100%": { transform: "rotateY(1080deg) scale(1)" },
         },
       },
     },

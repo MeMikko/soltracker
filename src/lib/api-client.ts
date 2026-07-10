@@ -1,5 +1,6 @@
 import type { ClusterGraph } from "@/lib/clustering/types";
 import type { TokenAnalytics } from "@/lib/data/token-analytics-service";
+import type { TrendingToken } from "@/lib/trending-tokens";
 import type {
   ApiError,
   RecentToken,
@@ -149,6 +150,19 @@ export async function activateProPayment(
   }
 
   return { ok: true, data: body, usage: body.usage };
+}
+
+export async function fetchCoinFlip(): Promise<
+  ApiSuccess<TrendingToken> | ApiFailure
+> {
+  const res = await fetch("/api/coin-flip", fetchOptions);
+  const body = await parseJson<TrendingToken & ApiError>(res);
+
+  if (!res.ok) {
+    return { ok: false, error: body, status: res.status };
+  }
+
+  return { ok: true, data: body, usage: null };
 }
 
 export async function searchAddress(
