@@ -18,7 +18,10 @@ function loadEnvFile(filename) {
       .trim()
       .replace(/^["']|["']$/g, "");
 
-    process.env[key] = value;
+    // Prefer platform env (Vercel) over files so dashboard secrets always win.
+    if (!process.env[key]) {
+      process.env[key] = value;
+    }
   }
 }
 
@@ -35,6 +38,11 @@ function upsertEnvValue(filename, key, value) {
   writeFileSync(path, content, "utf8");
 }
 
+function appendQueryParam(url, key, value) {
+  const joiner = url.includes("?") ? "&" : "?";
+  return `${url}${joiner}${key}=${value}`;
+}
+
 function buildDatabaseUrl() {
   const host = process.env.MYSQL_HOST?.trim();
   const user = process.env.MYSQL_USER?.trim();
@@ -47,19 +55,23 @@ function buildDatabaseUrl() {
   const password = process.env.MYSQL_PASSWORD ?? "";
   const port = process.env.MYSQL_PORT?.trim() || "3306";
   const ssl = process.env.MYSQL_SSL?.trim();
+  // Avoid multi-minute hangs when MySQL is firewalled from Vercel build IPs.
+  const connectTimeout = process.env.MYSQL_CONNECT_TIMEOUT?.trim() || "10";
 
   const credentials = `${encodeURIComponent(user)}:${encodeURIComponent(password)}`;
   let url = `mysql://${credentials}@${host}:${port}/${database}`;
 
   if (ssl === "true" || ssl === "1") {
     const mode = process.env.MYSQL_SSL_ACCEPT?.trim() || "accept_invalid_certs";
-    url += `?sslaccept=${mode}`;
+    url = appendQueryParam(url, "sslaccept", mode);
   }
+
+  url = appendQueryParam(url, "connect_timeout", connectTimeout);
 
   return url;
 }
 
-// .env.local overrides .env so MYSQL_* edits always win.
+// File env fills gaps only; existing process.env (Vercel) wins.
 loadEnvFile(".env");
 loadEnvFile(".env.local");
 

@@ -10,14 +10,19 @@ function buildDatabaseUrl(): string | null {
   const password = process.env.MYSQL_PASSWORD ?? "";
   const port = process.env.MYSQL_PORT?.trim() || "3306";
   const ssl = process.env.MYSQL_SSL?.trim();
+  const connectTimeout = process.env.MYSQL_CONNECT_TIMEOUT?.trim() || "10";
 
   const credentials = `${encodeURIComponent(user)}:${encodeURIComponent(password)}`;
   let url = `mysql://${credentials}@${host}:${port}/${database}`;
+  const params: string[] = [];
 
   if (ssl === "true" || ssl === "1") {
     const mode = process.env.MYSQL_SSL_ACCEPT?.trim() || "accept_invalid_certs";
-    url += `?sslaccept=${mode}`;
+    params.push(`sslaccept=${mode}`);
   }
+
+  params.push(`connect_timeout=${connectTimeout}`);
+  url += `?${params.join("&")}`;
 
   return url;
 }
