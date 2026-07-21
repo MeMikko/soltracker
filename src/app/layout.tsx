@@ -22,6 +22,9 @@ export const metadata: Metadata = {
     icon: "/zenlogo.jpg",
     apple: "/zenlogo.jpg",
   },
+  other: {
+    "virtual-protocol-site-verification": "1e233732d2971b2519974d52c9705fa9",
+  },
 };
 
 export default function RootLayout({
